@@ -133,10 +133,23 @@ open class CacheTrackerSectionedConsumer<T: CacheTrackerSectionedConsumerModel &
         return _sections[_sectionIndex(for: linearItemIndex)]
     }
     
-    open func reset() {
+    open func reset<P>(with transactions: [CacheTransaction<P>] = [CacheTransaction<P>](), notifyingDelegate: Bool = false) {
+        
         precondition(!_trackChanges)
         _sections.removeAll()
         _items.removeAll()
+        
+        let currentDelegate = delegate
+        
+        if !notifyingDelegate {
+            delegate = nil
+        }
+        
+        willChange()
+        consume(transactions: transactions)
+        didChange()
+        
+        delegate = currentDelegate
     }
     
     open func add(_ item: T, at linearItemIndex: Int) {

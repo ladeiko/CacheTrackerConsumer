@@ -2,6 +2,19 @@
 
 Helper classes for use as mediator between [CacheTracker](https://github.com/ladeiko/CacheTracker) and UI controls (UITableView, UICollectionView). It keeps local one or two dimentional array of items in sync with cache tracker storage. UI controls can interact with consumer directly. This is very helpful when you use VIPER architecture. You place consumer in VIEW and pass transactions from INTERACTOR through PRESENTER to your VIEW. VIEW in this case stays passive as VIPER rules requires and its state is controlled from PRESENTER only.
 
+## Changes
+
+### v1.1.0
+
+ * Changes signature of method **reset()*:
+
+ ```swift
+ open func reset<P>(with transactions: [CacheTransaction<P>] = [CacheTransaction<P>](), 
+ 		notifyingDelegate: Bool = false)
+ ```
+	If notifyingDelegate is false (by default), then you should reload your table or collection view after calling this
+	method.
+
 ## Types
 
 ### CacheTrackerPlainConsumer
