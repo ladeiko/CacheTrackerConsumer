@@ -12,8 +12,8 @@ Helper classes for use as mediator between [CacheTracker](https://github.com/lad
  open func reset<P>(with transactions: [CacheTransaction<P>] = [CacheTransaction<P>](), 
  		notifyingDelegate: Bool = false)
  ```
-	If notifyingDelegate is false (by default), then you should reload your table or collection view after calling this
-	method.
+If notifyingDelegate is false (by default), then you should reload your table or collection view after calling this
+method.
 
 ## Types
 
