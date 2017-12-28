@@ -14,27 +14,27 @@ extension UITableView: CacheTrackerSectionedConsumerDelegate {
     }
     
     open func cacheTrackerSectionedConsumerDidUpdateSection(at sectionIndex: Int) {
-        reloadSections(IndexSet(integer: sectionIndex), with: .fade)
+        reloadSections(IndexSet(integer: sectionIndex + cacheTrackerSectionOffset), with: .fade)
     }
     
     open func cacheTrackerSectionedConsumerDidRemoveSection(at sectionIndex: Int) {
-        deleteSections(IndexSet(integer: sectionIndex), with: .fade)
+        deleteSections(IndexSet(integer: sectionIndex + cacheTrackerSectionOffset), with: .fade)
     }
     
     open func cacheTrackerSectionedConsumerDidInsertSection(at sectionIndex: Int) {
-        insertSections(IndexSet(integer: sectionIndex), with: .fade)
+        insertSections(IndexSet(integer: sectionIndex + cacheTrackerSectionOffset), with: .fade)
     }
     
     open func cacheTrackerSectionedConsumerDidUpdateItem(at indexPath: IndexPath) {
-        reloadRows(at: [indexPath], with: .fade)
+        reloadRows(at: [IndexPath(row: indexPath.row, section: indexPath.section + cacheTrackerSectionOffset)], with: .fade)
     }
     
     open func cacheTrackerSectionedConsumerDidRemoveItem(at indexPath: IndexPath) {
-        deleteRows(at: [indexPath], with: .fade)
+        deleteRows(at: [IndexPath(row: indexPath.row, section: indexPath.section + cacheTrackerSectionOffset)], with: .fade)
     }
     
     open func cacheTrackerSectionedConsumerDidInsertItem(at indexPath: IndexPath) {
-        insertRows(at: [indexPath], with: .fade)
+        insertRows(at: [IndexPath(row: indexPath.row, section: indexPath.section + cacheTrackerSectionOffset)], with: .fade)
     }
     
     open func cacheTrackerSectionedConsumerEndUpdates() {

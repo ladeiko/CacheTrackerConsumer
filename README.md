@@ -15,6 +15,12 @@ Helper classes for use as mediator between [CacheTracker](https://github.com/lad
 If notifyingDelegate is false (by default), then you should reload your table or collection view after calling this
 method.
 
+### v1.2.0
+
+* New properties:
+  * var cacheTrackerItemsOffset: Int = 0 (used only in plain mode)
+  * var cacheTrackerSectionOffset: Int = 0 (used in both modes)
+
 ## Types
 
 ### CacheTrackerPlainConsumer
@@ -76,15 +82,26 @@ let cacheRequest = CacheRequest(predicate: NSPredicate(value: true), sortDescrip
 
 Fill up consumer with initial set of objects if required
 
+* using animated insert
+
 ```swift
 consumer.willChange()
 consumer.consume(transactions: cacheTracker.transactionsForCurrentState())
 consumer.didChange()
 ```
 
+* complete reload
+
+```swift
+consumer.reset(with: cacheTracker.transactionsForCurrentState())
+tableView.reloadData()
+```
+
 **NOTE**: You should call *willChange()* before any batch calls to *consume()*, *add()*, *remove()*, *update()* of consumer. After all batch operations were called you have to complete interaction with *didChange()* as in example above.
 
-Implement table view datasource (or collection view), where you will refer to consumer methods
+Implement table view datasource (or collection view), where you will refer to consumer methods:
+
+* where cacheTrackerSectionOffset == 0 and cacheTrackerItemsOffset == 0 (by default)
 
 ```swift
 override func numberOfSections(in tableView: UITableView) -> Int {
@@ -109,6 +126,50 @@ override func tableView(_ tableView: UITableView, titleForHeaderInSection sectio
     return item.section
 }
 ```
+
+* where cacheTrackerSectionOffset > 0 or cacheTrackerItemsOffset > 0
+
+```swift
+override func numberOfSections(in tableView: UITableView) -> Int {
+    return self.globalSectionCount(1)
+}
+    
+override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    if self.isPlainDataSection(section) {
+        return consumer.numberOfItems() + cacheTrackerItemsOffset
+    }
+    else {
+        return 1
+    }
+}
+    
+override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    if self.isPlainDataIndexPath(indexPath) {
+        return tableView.dequeueReusableCell(withIdentifier: "Default")!
+    }
+    else {
+        return tableView.dequeueReusableCell(withIdentifier: "Before")!
+    }
+}
+    
+override func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+    if self.isPlainDataIndexPath(indexPath) {
+        let item = consumer.object(at: self.plainIndexPath(from: indexPath).row)
+        cell.textLabel?.text = item.name
+    }
+    else {
+        cell.textLabel?.text = "Before \(indexPath)"
+    }
+}
+```
+
+### Offsets
+
+If you want to show items not from the beginning, then you can set offsets using:
+  * var cacheTrackerItemsOffset: Int = 0
+  * var cacheTrackerSectionOffset: Int = 0
+
+They control offset of data section / items from the beginning of the tableView or collectionView.
 
 For more detailed example see Demo project
 

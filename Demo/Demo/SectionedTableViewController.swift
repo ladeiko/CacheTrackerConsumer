@@ -24,6 +24,7 @@ class SectionedTableViewController: UITableViewController, CacheTrackerDelegate 
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        self.cacheTrackerSectionOffset = 2
         self.navigationItem.title = self.title
         
         if timer == nil {
@@ -96,6 +97,7 @@ class SectionedTableViewController: UITableViewController, CacheTrackerDelegate 
         
         consumer = CacheTrackerSectionedConsumer<PlainItem>()
         consumer.delegate = self
+        
         cacheTracker = CoreDataCacheTracker<CoreDataItem, PlainItem>(context: NSManagedObjectContext.mr_default())
         cacheTracker.delegate = self
         let cacheRequest = CacheRequest(predicate: NSPredicate(value: true), sortDescriptors: [
@@ -103,9 +105,9 @@ class SectionedTableViewController: UITableViewController, CacheTrackerDelegate 
             NSSortDescriptor(key: #keyPath(CoreDataItem.name), ascending: true)
             ])
         cacheTracker.fetchWithRequest(cacheRequest)
-        consumer.willChange()
-        consumer.consume(transactions: cacheTracker.transactionsForCurrentState())
-        consumer.didChange()
+        
+        consumer.reset(with: cacheTracker.transactionsForCurrentState(), notifyingDelegate: false)
+        
         self.tableView.reloadData()
     }
 
@@ -117,25 +119,45 @@ class SectionedTableViewController: UITableViewController, CacheTrackerDelegate 
     // MARK:
     
     override func numberOfSections(in tableView: UITableView) -> Int {
-        return consumer.sectionsCount()
+        return self.globalSectionCount(consumer.sectionsCount())
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return consumer.numberOfItems(at: section)
+        if self.isPlainDataSection(section) {
+            return consumer.numberOfItems(at: self.sectionedSection(section))
+        }
+        else {
+            return 1
+        }
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        return tableView.dequeueReusableCell(withIdentifier: "Default")!
+        if self.isPlainDataIndexPath(indexPath) {
+            return tableView.dequeueReusableCell(withIdentifier: "Default")!
+        }
+        else {
+            return tableView.dequeueReusableCell(withIdentifier: "Before")!
+        }
     }
     
     override func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        let item = consumer.object(at: indexPath)
-        cell.textLabel?.text = item.name
+        if self.isPlainDataIndexPath(indexPath) {
+            let item = consumer.object(at: self.plainIndexPath(from: indexPath))
+            cell.textLabel?.text = item.name
+        }
+        else {
+            cell.textLabel?.text = "Before \(indexPath)"
+        }
     }
     
     override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        let item = consumer.object(at: IndexPath(row: 0, section: section))
-        return item.section
+        if self.isPlainDataSection(section) {
+            let item = consumer.object(at: IndexPath(row: 0, section: self.plainSection(section)))
+            return item.section
+        }
+        else {
+            return "Before \(section)"
+        }
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {

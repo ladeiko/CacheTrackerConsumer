@@ -43,27 +43,27 @@ extension UICollectionView: CacheTrackerSectionedConsumerDelegate {
     }
     
     open func cacheTrackerSectionedConsumerDidUpdateSection(at sectionIndex: Int) {
-        sectionedUpdates!.append(CacheTrackerSectionedConsumerOperation(type: .sectionUpdate, sectionIndex: sectionIndex, itemIndex: nil))
+        sectionedUpdates!.append(CacheTrackerSectionedConsumerOperation(type: .sectionUpdate, sectionIndex: sectionIndex + cacheTrackerSectionOffset, itemIndex: nil))
     }
     
     open func cacheTrackerSectionedConsumerDidRemoveSection(at sectionIndex: Int) {
-        sectionedUpdates!.append(CacheTrackerSectionedConsumerOperation(type: .sectionDelete, sectionIndex: sectionIndex, itemIndex: nil))
+        sectionedUpdates!.append(CacheTrackerSectionedConsumerOperation(type: .sectionDelete, sectionIndex: sectionIndex + cacheTrackerSectionOffset, itemIndex: nil))
     }
     
     open func cacheTrackerSectionedConsumerDidInsertSection(at sectionIndex: Int) {
-        sectionedUpdates!.append(CacheTrackerSectionedConsumerOperation(type: .sectionInsert, sectionIndex: sectionIndex, itemIndex: nil))
+        sectionedUpdates!.append(CacheTrackerSectionedConsumerOperation(type: .sectionInsert, sectionIndex: sectionIndex + cacheTrackerSectionOffset, itemIndex: nil))
     }
     
     open func cacheTrackerSectionedConsumerDidUpdateItem(at indexPath: IndexPath) {
-        sectionedUpdates!.append(CacheTrackerSectionedConsumerOperation(type: .itemUpdate, sectionIndex: nil, itemIndex: indexPath))
+        sectionedUpdates!.append(CacheTrackerSectionedConsumerOperation(type: .itemUpdate, sectionIndex: nil, itemIndex: IndexPath(row: indexPath.row, section: indexPath.section + cacheTrackerSectionOffset)))
     }
     
     open func cacheTrackerSectionedConsumerDidRemoveItem(at indexPath: IndexPath) {
-        sectionedUpdates!.append(CacheTrackerSectionedConsumerOperation(type: .itemDelete, sectionIndex: nil, itemIndex: indexPath))
+        sectionedUpdates!.append(CacheTrackerSectionedConsumerOperation(type: .itemDelete, sectionIndex: nil, itemIndex: IndexPath(row: indexPath.row, section: indexPath.section + cacheTrackerSectionOffset)))
     }
     
     open func cacheTrackerSectionedConsumerDidInsertItem(at indexPath: IndexPath) {
-        sectionedUpdates!.append(CacheTrackerSectionedConsumerOperation(type: .itemInsert, sectionIndex: nil, itemIndex: indexPath))
+        sectionedUpdates!.append(CacheTrackerSectionedConsumerOperation(type: .itemInsert, sectionIndex: nil, itemIndex: IndexPath(row: indexPath.row, section: indexPath.section + cacheTrackerSectionOffset)))
     }
     
     open func cacheTrackerSectionedConsumerEndUpdates() {

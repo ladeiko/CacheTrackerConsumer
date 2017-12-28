@@ -14,15 +14,15 @@ extension UITableView: CacheTrackerPlainConsumerDelegate {
     }
     
     open func cacheTrackerPlainConsumerDidUpdateItem(at index: Int) {
-        reloadRows(at: [IndexPath(row: index, section: 0)], with: .fade)
+        reloadRows(at: [IndexPath(row: index + cacheTrackerItemsOffset, section: cacheTrackerSectionOffset)], with: .fade)
     }
     
     open func cacheTrackerPlainConsumerDidRemoveItem(at index: Int) {
-        deleteRows(at: [IndexPath(row: index, section: 0)], with: .fade)
+        deleteRows(at: [IndexPath(row: index + cacheTrackerItemsOffset, section: cacheTrackerSectionOffset)], with: .fade)
     }
     
     open func cacheTrackerPlainConsumerDidInsertItem(at index: Int) {
-        insertRows(at: [IndexPath(row: index, section: 0)], with: .fade)
+        insertRows(at: [IndexPath(row: index + cacheTrackerItemsOffset, section: cacheTrackerSectionOffset)], with: .fade)
     }
     
     open func cacheTrackerPlainConsumerEndUpdates() {

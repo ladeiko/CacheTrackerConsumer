@@ -39,15 +39,15 @@ extension UICollectionView: CacheTrackerPlainConsumerDelegate {
     }
     
     open func cacheTrackerPlainConsumerDidUpdateItem(at index: Int) {
-        plainUpdates!.append(CacheTrackerPlainConsumerOperation(type: .itemUpdate, index: index))
+        plainUpdates!.append(CacheTrackerPlainConsumerOperation(type: .itemUpdate, index: index + cacheTrackerItemsOffset))
     }
     
     open func cacheTrackerPlainConsumerDidRemoveItem(at index: Int) {
-        plainUpdates!.append(CacheTrackerPlainConsumerOperation(type: .itemDelete, index: index))
+        plainUpdates!.append(CacheTrackerPlainConsumerOperation(type: .itemDelete, index: index + cacheTrackerItemsOffset))
     }
     
     open func cacheTrackerPlainConsumerDidInsertItem(at index: Int) {
-        plainUpdates!.append(CacheTrackerPlainConsumerOperation(type: .itemInsert, index: index))
+        plainUpdates!.append(CacheTrackerPlainConsumerOperation(type: .itemInsert, index: index + cacheTrackerItemsOffset))
     }
     
     open func cacheTrackerPlainConsumerEndUpdates() {
@@ -67,11 +67,11 @@ extension UICollectionView: CacheTrackerPlainConsumerDelegate {
             for update in updates {
                 switch update.type {
                 case .itemInsert:
-                    self.insertItems(at: [IndexPath(row:update.index, section: 0)])
+                    self.insertItems(at: [IndexPath(row:update.index, section: cacheTrackerSectionOffset)])
                 case .itemDelete:
-                    self.deleteItems(at: [IndexPath(row:update.index, section: 0)])
+                    self.deleteItems(at: [IndexPath(row:update.index, section: cacheTrackerSectionOffset)])
                 case .itemUpdate:
-                    self.reloadItems(at: [IndexPath(row:update.index, section: 0)])
+                    self.reloadItems(at: [IndexPath(row:update.index, section: cacheTrackerSectionOffset)])
                 }
             }
         }, completion: nil)
