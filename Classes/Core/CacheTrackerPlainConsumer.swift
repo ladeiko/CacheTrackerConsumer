@@ -79,6 +79,20 @@ open class CacheTrackerPlainConsumer<T: CacheTrackerPlainModel>: NSObject {
     open func object(at index: Int) -> T {
         return _items[index]
     }
+
+    open func items() -> [T] {
+        return _items
+    }
+    
+    open func indexOfItem(by comparator: (_ item: T) -> Bool) -> Int? {
+        let count = _items.count
+        for i in 0..<count {
+            if comparator(_items[i]) {
+                return i
+            }
+        }
+        return nil
+    }
     
     open func reset<P>(with transactions: [CacheTransaction<P>] = [CacheTransaction<P>](), notifyingDelegate: Bool = false) {
         precondition(!_trackChanges)

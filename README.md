@@ -4,6 +4,27 @@ Helper classes for use as mediator between [CacheTracker](https://github.com/lad
 
 ## Changes
 
+### v1.3.0
+
+* Add
+
+```swift 
+open func items() -> [T]
+```
+and 
+
+```swift 
+func indexOfItem(by comparator: (_ item: T) -> Bool) -> Int?
+``` 
+
+to CacheTrackerPlainConsumer
+  
+### v1.2.0
+
+* New properties:
+  * var cacheTrackerItemsOffset: Int = 0 (used only in plain mode)
+  * var cacheTrackerSectionOffset: Int = 0 (used in both modes)
+  
 ### v1.1.0
 
  * Changes signature of method **reset()*:
@@ -14,12 +35,6 @@ Helper classes for use as mediator between [CacheTracker](https://github.com/lad
  ```
 If notifyingDelegate is false (by default), then you should reload your table or collection view after calling this
 method.
-
-### v1.2.0
-
-* New properties:
-  * var cacheTrackerItemsOffset: Int = 0 (used only in plain mode)
-  * var cacheTrackerSectionOffset: Int = 0 (used in both modes)
 
 ## Types
 
