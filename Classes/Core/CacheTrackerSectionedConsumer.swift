@@ -31,7 +31,42 @@ public protocol CacheTrackerSectionedConsumerModel {
     }
 }
 
+// Should be called inside performBatchUpdates of UICollectionView
+public typealias CacheTrackerSectionedConsumerDelegateEndUpdatesBlock = () -> Void
+
 @objc public protocol CacheTrackerSectionedConsumerDelegate {
+    
+    // Added to conform of behavior described in Apple docs:
+    //
+    //  https://developer.apple.com/library/content/documentation/WindowsViews/Conceptual/CollectionViewPGforIOS/CreatingCellsandViews/CreatingCellsandViews.html#//apple_ref/doc/uid/TP40012334-CH7-SW1
+    //
+    //
+    // If implemented, then it is called but real updates to consumer are applied when 'applyChangesBlock' is called.
+    //
+    //  Execution flow:
+    //      cacheTrackerPlainConsumerBatchUpdates: { // applyChangesBlock
+    //
+    //        cacheTrackerSectionedConsumerBeginUpdates
+    //        cacheTrackerSectionedConsumerDidUpdateItem / cacheTrackerSectionedConsumerDidRemoveItem / cacheTrackerSectionedConsumerDidInsertItem, etc...
+    //        cacheTrackerSectionedConsumerEndUpdates
+    //
+    //      }
+    //
+    // NOTE: Should be used when using UICollectionView:
+    //
+    //  func cacheTrackerSectionedConsumerBatchUpdates(_ block: CacheTrackerSectionedConsumerDelegateEndUpdatesBlock) {
+    //      self.collectionView.performBatchUpdates({
+    //          applyChangesBlock() // All changes will be applied to consumer and propagated to UICollectionView.
+    //                              // See execution flow described before.
+    //      }, completion: nil)
+    //  }
+    //
+    //  See Demo project for examples.
+    //
+    
+    @objc
+    optional func cacheTrackerSectionedConsumerBatchUpdates(_ applyChangesBlock: @escaping CacheTrackerSectionedConsumerDelegateEndUpdatesBlock)
+    
     func cacheTrackerSectionedConsumerBeginUpdates()
     func cacheTrackerSectionedConsumerDidUpdateSection(at sectionIndex: Int)
     func cacheTrackerSectionedConsumerDidRemoveSection(at sectionIndex: Int)
@@ -323,151 +358,171 @@ open class CacheTrackerSectionedConsumer<T: CacheTrackerSectionedConsumerModel &
     @discardableResult
     open func didChange(returnChanges: Bool = false) -> CacheTrackerSectionedConsumerChanges? {
         
-        precondition(_trackChanges)
+        var changes: CacheTrackerSectionedConsumerChanges?
         
-        for (i, s) in _sections.enumerated() {
-            s.sectionTitleBeforeUpdate = _items[s.start].sectionTitle()
-            s.indexBeforeUpdate = i
-        }
-        
-        delegate?.cacheTrackerSectionedConsumerBeginUpdates()
-        
-        _updatedSections = [Int]()
-        _removedSections = [Int]()
-        _insertedSections = [Int]()
-        _updatedItems = [IndexPath]()
-        _removedItems = [IndexPath]()
-        _insertedItems = [IndexPath]()
-        
-        _deletions.sort(by: IndexOperation.comparator(true))
-        _adds.sort(by: IndexOperation.comparator())
-        _updates.sort(by: IndexOperation.comparator())
-        
-        for o in _updates {
-            _update(o.item, at: o.index)
-        }
-        
-        _updates.removeAll()
-        
-        for o in _deletions {
-            _remove(at: o.index)
-        }
-        
-        _deletions.removeAll()
-        
-        for o in _adds {
-            _add(o.item, at: o.index)
-        }
-        
-        _adds.removeAll()
-        
-        _updatedItems.sort { (a, b) -> Bool in
-            return a <= b
-        }
-        
-        _removedSections.sort { (a, b) -> Bool in
-            return a >= b
-        }
-        
-        _insertedSections.sort { (a, b) -> Bool in
-            return a <= b
-        }
-        
-        _removedItems.sort { (a, b) -> Bool in
-            return a >= b
-        }
-        
-        _insertedItems.sort { (a, b) -> Bool in
-            return a <= b
-        }
-        
-        let deletedSections = Set(_removedSections)
-        
-        // We do not want to remove items from already section being deleted
-        _removedItems = _removedItems.filter({ (o) -> Bool in
-            return !deletedSections.contains(o.section)
-        })
-        
-        // If we have inserted section in place of deleted one, then just call
-        // reload of section
-        for s in _insertedSections {
-            if deletedSections.contains(s) {
-                _updatedSections.append(s)
+        let job: () -> Void = {
+            
+            precondition(self._trackChanges)
+            
+            for (i, s) in self._sections.enumerated() {
+                s.sectionTitleBeforeUpdate = self._items[s.start].sectionTitle()
+                s.indexBeforeUpdate = i
             }
-        }
-        
-        let firstStageReloadedSections = Set(_updatedSections)
-        for s in _sections {
-            if s.indexBeforeUpdate != nil {
-                if s.sectionTitleBeforeUpdate != _items[s.start].sectionTitle() {
-                    if !firstStageReloadedSections.contains(s.indexBeforeUpdate!) {
-                        _updatedSections.append(s.indexBeforeUpdate!)
+            
+            self.delegate?.cacheTrackerSectionedConsumerBeginUpdates()
+            
+            self._updatedSections = [Int]()
+            self._removedSections = [Int]()
+            self._insertedSections = [Int]()
+            self._updatedItems = [IndexPath]()
+            self._removedItems = [IndexPath]()
+            self._insertedItems = [IndexPath]()
+            
+            self._deletions.sort(by: IndexOperation.comparator(true))
+            self._adds.sort(by: IndexOperation.comparator())
+            self._updates.sort(by: IndexOperation.comparator())
+            
+            for o in self._updates {
+                self._update(o.item, at: o.index)
+            }
+            
+            self._updates.removeAll()
+            
+            for o in self._deletions {
+                self._remove(at: o.index)
+            }
+            
+            self._deletions.removeAll()
+            
+            for o in self._adds {
+                self._add(o.item, at: o.index)
+            }
+            
+            self._adds.removeAll()
+            
+            self._updatedItems.sort { (a, b) -> Bool in
+                return a <= b
+            }
+            
+            self._removedSections.sort { (a, b) -> Bool in
+                return a >= b
+            }
+            
+            self._insertedSections.sort { (a, b) -> Bool in
+                return a <= b
+            }
+            
+            self._removedItems.sort { (a, b) -> Bool in
+                return a >= b
+            }
+            
+            self._insertedItems.sort { (a, b) -> Bool in
+                return a <= b
+            }
+            
+            let deletedSections = Set(self._removedSections)
+            
+            // We do not want to remove items from already section being deleted
+            self._removedItems = self._removedItems.filter({ (o) -> Bool in
+                return !deletedSections.contains(o.section)
+            })
+            
+            // If we have inserted section in place of deleted one, then just call
+            // reload of section
+            for s in self._insertedSections {
+                if deletedSections.contains(s) {
+                    self._updatedSections.append(s)
+                }
+            }
+            
+            let firstStageReloadedSections = Set(self._updatedSections)
+            for s in self._sections {
+                if s.indexBeforeUpdate != nil {
+                    if s.sectionTitleBeforeUpdate != self._items[s.start].sectionTitle() {
+                        if !firstStageReloadedSections.contains(s.indexBeforeUpdate!) {
+                            self._updatedSections.append(s.indexBeforeUpdate!)
+                        }
                     }
                 }
             }
+            
+            let reloadedSections = Set(self._updatedSections)
+            
+            // reloaded section should not be removed
+            self._removedSections = self._removedSections.filter({ (o) -> Bool in
+                return !reloadedSections.contains(o)
+            })
+            
+            // reloaded section should not be inserted
+            self._insertedSections = self._insertedSections.filter({ (o) -> Bool in
+                return !reloadedSections.contains(o)
+            })
+            
+            // If section is reloaded, then there is no need to insert items in such section
+            self._insertedItems = self._insertedItems.filter({ (o) -> Bool in
+                return !reloadedSections.contains(o.section)
+            })
+            
+            for i in self._updatedItems {
+                self.delegate?.cacheTrackerSectionedConsumerDidUpdateItem(at: i)
+            }
+            
+            for i in self._updatedSections {
+                self.delegate?.cacheTrackerSectionedConsumerDidUpdateSection(at: i)
+            }
+            
+            for i in self._removedSections {
+                self.delegate?.cacheTrackerSectionedConsumerDidRemoveSection(at: i)
+            }
+            
+            for i in self._insertedSections {
+                self.delegate?.cacheTrackerSectionedConsumerDidInsertSection(at: i)
+            }
+            
+            for i in self._removedItems {
+                self.delegate?.cacheTrackerSectionedConsumerDidRemoveItem(at: i)
+            }
+            
+            for i in self._insertedItems {
+                self.delegate?.cacheTrackerSectionedConsumerDidInsertItem(at: i)
+            }
+            
+            if returnChanges {
+                changes = CacheTrackerSectionedConsumerChanges(updatedRows: self._updatedItems,
+                                                       reloadedSections: self._updatedSections,
+                                                       deletedSections: self._removedSections,
+                                                       insertedSections: self._insertedSections,
+                                                       deletedRows: self._removedItems,
+                                                       insertedRows: self._insertedItems)
+            }
+            
+            self._updatedSections = nil
+            self._removedSections = nil
+            self._insertedSections = nil
+            self._removedItems = nil
+            self._insertedItems = nil
+            self._updatedItems = nil
+            
+            self._trackChanges = false
+            
+            self.delegate?.cacheTrackerSectionedConsumerEndUpdates()
         }
         
-        let reloadedSections = Set(_updatedSections)
         
-        // reloaded section should not be removed
-        _removedSections = _removedSections.filter({ (o) -> Bool in
-            return !reloadedSections.contains(o)
-        })
-        
-        // reloaded section should not be inserted
-        _insertedSections = _insertedSections.filter({ (o) -> Bool in
-            return !reloadedSections.contains(o)
-        })
-        
-        // If section is reloaded, then there is no need to insert items in such section
-        _insertedItems = _insertedItems.filter({ (o) -> Bool in
-            return !reloadedSections.contains(o.section)
-        })
-        
-        for i in _updatedItems {
-            delegate?.cacheTrackerSectionedConsumerDidUpdateItem(at: i)
+        if (delegate as? NSObject)?.responds(to: #selector(CacheTrackerSectionedConsumerDelegate.cacheTrackerSectionedConsumerBatchUpdates(_:))) == true {
+            
+            // cacheTrackerSectionedConsumerBatchUpdates could not be used with returnChanges as true
+            precondition(returnChanges == false)
+            
+            delegate!.cacheTrackerSectionedConsumerBatchUpdates! {
+                job()
+            }
+            
+            return nil
         }
         
-        for i in _updatedSections {
-            delegate?.cacheTrackerSectionedConsumerDidUpdateSection(at: i)
-        }
+        job()
         
-        for i in _removedSections {
-            delegate?.cacheTrackerSectionedConsumerDidRemoveSection(at: i)
-        }
-        
-        for i in _insertedSections {
-            delegate?.cacheTrackerSectionedConsumerDidInsertSection(at: i)
-        }
-        
-        for i in _removedItems {
-            delegate?.cacheTrackerSectionedConsumerDidRemoveItem(at: i)
-        }
-        
-        for i in _insertedItems {
-            delegate?.cacheTrackerSectionedConsumerDidInsertItem(at: i)
-        }
-        
-        var changes: CacheTrackerSectionedConsumerChanges?
-        if returnChanges {
-            changes = CacheTrackerSectionedConsumerChanges(updatedRows: _updatedItems,
-                                                   reloadedSections: _updatedSections,
-                                                   deletedSections: _removedSections,
-                                                   insertedSections: _insertedSections,
-                                                   deletedRows: _removedItems,
-                                                   insertedRows: _insertedItems)
-        }
-        
-        _updatedSections = nil
-        _removedSections = nil
-        _insertedSections = nil
-        _removedItems = nil
-        _insertedItems = nil
-        _updatedItems = nil
-        
-        _trackChanges = false
-        
-        delegate?.cacheTrackerSectionedConsumerEndUpdates()
         return changes
     }
     

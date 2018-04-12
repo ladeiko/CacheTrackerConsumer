@@ -34,6 +34,12 @@ extension UICollectionViewController: CacheTrackerPlainConsumerDelegate {
         }
     }
     
+    open func cacheTrackerPlainConsumerBatchUpdates(_ applyChangesBlock: @escaping CacheTrackerPlainConsumerDelegateEndUpdatesBlock) {
+        self.collectionView?.ctc_performBatchUpdates({
+            applyChangesBlock()
+        }, completion: nil)
+    }
+    
     open func cacheTrackerPlainConsumerBeginUpdates() {
         plainUpdates = [CacheTrackerPlainConsumerOperation]()
     }
@@ -63,24 +69,14 @@ extension UICollectionViewController: CacheTrackerPlainConsumerDelegate {
             return
         }
         
-        let exception = CacheTrackerConsumer_tryBlock {
-            self.collectionView!.performBatchUpdates({
-                for update in updates {
-                    switch update.type {
-                    case .itemInsert:
-                        self.collectionView!.insertItems(at: [IndexPath(row: update.index, section: self.cacheTrackerSectionOffset)])
-                    case .itemDelete:
-                        self.collectionView!.deleteItems(at: [IndexPath(row: update.index, section: self.cacheTrackerSectionOffset)])
-                    case .itemUpdate:
-                        self.collectionView!.reloadItems(at: [IndexPath(row: update.index, section: self.cacheTrackerSectionOffset)])
-                    }
-                }
-            }, completion: nil)
-        }
-        
-        if exception != nil {
-            CacheTrackerConsumer_tryBlock {
-                self.collectionView!.reloadData()
+        for update in updates {
+            switch update.type {
+            case .itemInsert:
+                self.collectionView!.insertItems(at: [IndexPath(row: update.index, section: self.cacheTrackerSectionOffset)])
+            case .itemDelete:
+                self.collectionView!.deleteItems(at: [IndexPath(row: update.index, section: self.cacheTrackerSectionOffset)])
+            case .itemUpdate:
+                self.collectionView!.reloadItems(at: [IndexPath(row: update.index, section: self.cacheTrackerSectionOffset)])
             }
         }
     }

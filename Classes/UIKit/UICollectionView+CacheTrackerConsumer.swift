@@ -77,6 +77,21 @@ extension UICollectionView {
         return isSectionedDataSection(indexPath.section)
     }
     
+    open func ctc_performBatchUpdates(_ updates: (() -> Swift.Void)?, completion: ((Bool) -> Swift.Void)? = nil) {
+        
+        let exception = CacheTrackerConsumer_tryBlock {
+            self.performBatchUpdates(updates, completion: completion)
+        }
+        
+        if exception != nil {
+            CacheTrackerConsumer_tryBlock {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.01, execute: {
+                    self.reloadData()
+                })
+            }
+        }
+    }
+    
 }
 
 extension UICollectionViewController {

@@ -124,10 +124,10 @@
 		12C6E7411FBB0FE7008891C3 /* CacheTrackerSectionedConsumerTests */ = {
 			isa = PBXGroup;
 			children = (
-				12C6E7531FBB15E3008891C3 /* CoreDataCacheTrackerSectionedConsumer.swift */,
-				12C6E74A1FBB1011008891C3 /* SectionedTestItem.swift */,
 				12C6E7481FBB1011008891C3 /* TestModel.swift */,
+				12C6E74A1FBB1011008891C3 /* SectionedTestItem.swift */,
 				12C6E7511FBB152A008891C3 /* SectionedTableView.swift */,
+				12C6E7531FBB15E3008891C3 /* CoreDataCacheTrackerSectionedConsumer.swift */,
 				12C6E7491FBB1011008891C3 /* CacheTrackerSectionedConsumerTests.swift */,
 				12C6E74B1FBB1011008891C3 /* CacheTrackerSectionedConsumerTests.xcdatamodeld */,
 				12C6E7441FBB0FE7008891C3 /* Info.plist */,
@@ -528,7 +528,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.ladzeika.CacheTrackerSectionedConsumerTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 3.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Demo.app/Demo";
 			};
@@ -543,7 +543,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.ladzeika.CacheTrackerSectionedConsumerTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 3.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Demo.app/Demo";
 			};

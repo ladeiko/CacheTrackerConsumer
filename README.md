@@ -55,6 +55,7 @@ You can say that "why do not use direct section notifications from CacheTracker"
 
 ## Usage
 To use with CacheTrackerSectionedConsumer just make your plain model compatibel with CacheTrackerSectionedConsumerModel protocol.
+For complete examples see Demo project.
 
 ```swift
 class PlainItem: CacheTrackerPlainModel, CacheTrackerSectionedConsumerModel {

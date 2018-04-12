@@ -38,6 +38,12 @@ extension UICollectionViewController: CacheTrackerSectionedConsumerDelegate {
         }
     }
     
+    open func cacheTrackerSectionedConsumerBatchUpdates(_ applyChangesBlock: @escaping CacheTrackerSectionedConsumerDelegateEndUpdatesBlock) {
+        self.collectionView?.ctc_performBatchUpdates({
+            applyChangesBlock()
+        }, completion: nil)
+    }
+    
     open func cacheTrackerSectionedConsumerBeginUpdates() {
         sectionedUpdates = [CacheTrackerSectionedConsumerOperation]()
     }
@@ -79,30 +85,20 @@ extension UICollectionViewController: CacheTrackerSectionedConsumerDelegate {
             return
         }
         
-        let exception = CacheTrackerConsumer_tryBlock {
-            self.collectionView!.performBatchUpdates({
-                for update in updates {
-                    switch update.type {
-                    case .sectionInsert:
-                        self.collectionView!.insertSections(IndexSet(integer: update.sectionIndex!))
-                    case .sectionDelete:
-                        self.collectionView!.deleteSections(IndexSet(integer: update.sectionIndex!))
-                    case .sectionUpdate:
-                        self.collectionView!.reloadSections(IndexSet(integer: update.sectionIndex!))
-                    case .itemInsert:
-                        self.collectionView!.insertItems(at: [update.itemIndex!])
-                    case .itemDelete:
-                        self.collectionView!.deleteItems(at: [update.itemIndex!])
-                    case .itemUpdate:
-                        self.collectionView!.reloadItems(at: [update.itemIndex!])
-                    }
-                }
-            }, completion: nil)
-        }
-        
-        if exception != nil {
-            CacheTrackerConsumer_tryBlock {
-                self.collectionView!.reloadData()
+        for update in updates {
+            switch update.type {
+            case .sectionInsert:
+                self.collectionView!.insertSections(IndexSet(integer: update.sectionIndex!))
+            case .sectionDelete:
+                self.collectionView!.deleteSections(IndexSet(integer: update.sectionIndex!))
+            case .sectionUpdate:
+                self.collectionView!.reloadSections(IndexSet(integer: update.sectionIndex!))
+            case .itemInsert:
+                self.collectionView!.insertItems(at: [update.itemIndex!])
+            case .itemDelete:
+                self.collectionView!.deleteItems(at: [update.itemIndex!])
+            case .itemUpdate:
+                self.collectionView!.reloadItems(at: [update.itemIndex!])
             }
         }
     }

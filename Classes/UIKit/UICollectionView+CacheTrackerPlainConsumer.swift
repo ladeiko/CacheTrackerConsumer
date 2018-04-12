@@ -34,6 +34,12 @@ extension UICollectionView: CacheTrackerPlainConsumerDelegate {
         }
     }
     
+    open func cacheTrackerPlainConsumerBatchUpdates(_ applyChangesBlock: @escaping CacheTrackerPlainConsumerDelegateEndUpdatesBlock) {
+        self.ctc_performBatchUpdates({
+            applyChangesBlock()
+        }, completion: nil)
+    }
+    
     open func cacheTrackerPlainConsumerBeginUpdates() {
         plainUpdates = [CacheTrackerPlainConsumerOperation]()
     }
@@ -63,24 +69,14 @@ extension UICollectionView: CacheTrackerPlainConsumerDelegate {
             return
         }
         
-        let exception = CacheTrackerConsumer_tryBlock {
-            self.performBatchUpdates({
-                for update in updates {
-                    switch update.type {
-                    case .itemInsert:
-                        self.insertItems(at: [IndexPath(row:update.index, section: self.cacheTrackerSectionOffset)])
-                    case .itemDelete:
-                        self.deleteItems(at: [IndexPath(row:update.index, section: self.cacheTrackerSectionOffset)])
-                    case .itemUpdate:
-                        self.reloadItems(at: [IndexPath(row:update.index, section: self.cacheTrackerSectionOffset)])
-                    }
-                }
-            }, completion: nil)
-        }
-        
-        if exception != nil {
-            CacheTrackerConsumer_tryBlock {
-                self.reloadData()
+        for update in updates {
+            switch update.type {
+            case .itemInsert:
+                self.insertItems(at: [IndexPath(row:update.index, section: self.cacheTrackerSectionOffset)])
+            case .itemDelete:
+                self.deleteItems(at: [IndexPath(row:update.index, section: self.cacheTrackerSectionOffset)])
+            case .itemUpdate:
+                self.reloadItems(at: [IndexPath(row:update.index, section: self.cacheTrackerSectionOffset)])
             }
         }
     }

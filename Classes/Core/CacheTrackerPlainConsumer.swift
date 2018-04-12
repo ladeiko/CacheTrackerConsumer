@@ -21,11 +21,47 @@ import CacheTracker
     }
 }
 
-@objc public protocol CacheTrackerPlainConsumerDelegate {
+// Should be called inside performBatchUpdates of UICollectionView
+public typealias CacheTrackerPlainConsumerDelegateEndUpdatesBlock = () -> Void
+
+@objc
+public protocol CacheTrackerPlainConsumerDelegate {
+
+    //
+    // If implemented, then it is called but real updates to consumer are applied when 'applyChangesBlock' is called.
+    //
+    //  Execution flow:
+    //      cacheTrackerPlainConsumerBatchUpdates: { // applyChangesBlock
+    //
+    //        cacheTrackerPlainConsumerBeginUpdates
+    //        cacheTrackerPlainConsumerDidUpdateItem / cacheTrackerPlainConsumerDidRemoveItem / cacheTrackerPlainConsumerDidInsertItem
+    //        cacheTrackerPlainConsumerEndUpdates
+    //
+    //      }
+    //
+    // NOTE: Should be used when using UICollectionView:
+    //
+    //  func cacheTrackerPlainConsumerBatchUpdates(_ block: CacheTrackerPlainConsumerDelegateEndUpdatesBlock) {
+    //      self.collectionView.performBatchUpdates({
+    //          applyChangesBlock() // All changes will be applied to consumer and propagated to UICollectionView.
+    //                              // See execution flow described before.
+    //      }, completion: nil)
+    //  }
+    //
+    //  See Demo project for examples.
+    //
+    
+    @objc
+    optional func cacheTrackerPlainConsumerBatchUpdates(_ applyChangesBlock: @escaping CacheTrackerPlainConsumerDelegateEndUpdatesBlock)
+    
     func cacheTrackerPlainConsumerBeginUpdates()
+    
+    // Updating
     func cacheTrackerPlainConsumerDidUpdateItem(at index: Int)
     func cacheTrackerPlainConsumerDidRemoveItem(at index: Int)
     func cacheTrackerPlainConsumerDidInsertItem(at index: Int)
+
+    // Usefull for UITableView
     func cacheTrackerPlainConsumerEndUpdates()
 }
 
@@ -155,74 +191,93 @@ open class CacheTrackerPlainConsumer<T: CacheTrackerPlainModel>: NSObject {
     @discardableResult
     open func didChange(returnChanges: Bool = false) -> CacheTrackerPlainConsumerChanges? {
         
-        precondition(_trackChanges)
-        
-        delegate?.cacheTrackerPlainConsumerBeginUpdates()
-        
-        _updatedItems = [Int]()
-        _removedItems = [Int]()
-        _insertedItems = [Int]()
-        
-        _deletions.sort(by: IndexOperation.comparator(true))
-        _adds.sort(by: IndexOperation.comparator())
-        _updates.sort(by: IndexOperation.comparator())
-        
-        for o in _updates {
-            _update(o.item, at: o.index)
-        }
-        
-        _updates.removeAll()
-        
-        for o in _deletions {
-            _remove(at: o.index)
-        }
-        
-        _deletions.removeAll()
-        
-        for o in _adds {
-            _add(o.item, at: o.index)
-        }
-        
-        _adds.removeAll()
-        
-        _updatedItems.sort { (a, b) -> Bool in
-            return a <= b
-        }
-        
-        _removedItems.sort { (a, b) -> Bool in
-            return a >= b
-        }
-        
-        _insertedItems.sort { (a, b) -> Bool in
-            return a <= b
-        }
-        
-        for i in _updatedItems {
-            delegate?.cacheTrackerPlainConsumerDidUpdateItem(at: i)
-        }
-        
-        for i in _removedItems {
-            delegate?.cacheTrackerPlainConsumerDidRemoveItem(at: i)
-        }
-        
-        for i in _insertedItems {
-            delegate?.cacheTrackerPlainConsumerDidInsertItem(at: i)
-        }
-        
         var changes: CacheTrackerPlainConsumerChanges?
-        if returnChanges {
-            changes = CacheTrackerPlainConsumerChanges(updatedRows: _updatedItems,
-                                                   deletedRows: _removedItems,
-                                                   insertedRows: _insertedItems)
+        
+        let job: () -> Void = {
+            
+            precondition(self._trackChanges)
+            
+            self.delegate?.cacheTrackerPlainConsumerBeginUpdates()
+            
+            self._updatedItems = [Int]()
+            self._removedItems = [Int]()
+            self._insertedItems = [Int]()
+            
+            self._deletions.sort(by: IndexOperation.comparator(true))
+            self._adds.sort(by: IndexOperation.comparator())
+            self._updates.sort(by: IndexOperation.comparator())
+            
+            for o in self._updates {
+                self._update(o.item, at: o.index)
+            }
+            
+            self._updates.removeAll()
+            
+            for o in self._deletions {
+                self._remove(at: o.index)
+            }
+            
+            self._deletions.removeAll()
+            
+            for o in self._adds {
+                self._add(o.item, at: o.index)
+            }
+            
+            self._adds.removeAll()
+            
+            self._updatedItems.sort { (a, b) -> Bool in
+                return a <= b
+            }
+            
+            self._removedItems.sort { (a, b) -> Bool in
+                return a >= b
+            }
+            
+            self._insertedItems.sort { (a, b) -> Bool in
+                return a <= b
+            }
+            
+            for i in self._updatedItems {
+                self.delegate?.cacheTrackerPlainConsumerDidUpdateItem(at: i)
+            }
+            
+            for i in self._removedItems {
+                self.delegate?.cacheTrackerPlainConsumerDidRemoveItem(at: i)
+            }
+            
+            for i in self._insertedItems {
+                self.delegate?.cacheTrackerPlainConsumerDidInsertItem(at: i)
+            }
+            
+            if returnChanges {
+                changes = CacheTrackerPlainConsumerChanges(updatedRows: self._updatedItems,
+                                                       deletedRows: self._removedItems,
+                                                       insertedRows: self._insertedItems)
+            }
+            
+            self._removedItems = nil
+            self._insertedItems = nil
+            self._updatedItems = nil
+            
+            self._trackChanges = false
+            
+            self.delegate?.cacheTrackerPlainConsumerEndUpdates()
         }
         
-        _removedItems = nil
-        _insertedItems = nil
-        _updatedItems = nil
+        if (delegate as? NSObject)?.responds(to: #selector(CacheTrackerPlainConsumerDelegate.cacheTrackerPlainConsumerBatchUpdates(_:))) == true {
+            
+            // cacheTrackerPlainConsumerBatchUpdates could not be used with returnChanges as true
+            precondition(returnChanges == false)
+            
+            delegate!.cacheTrackerPlainConsumerBatchUpdates! {
+                job()
+            }
+            
+            return nil
+        }
         
-        _trackChanges = false
+        job()
         
-        delegate?.cacheTrackerPlainConsumerEndUpdates()
         return changes
     }
     
