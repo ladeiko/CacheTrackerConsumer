@@ -38,7 +38,14 @@ extension UITableView: CacheTrackerSectionedConsumerDelegate {
     }
     
     open func cacheTrackerSectionedConsumerEndUpdates() {
-        endUpdates()
+        let exception = CacheTrackerConsumer_tryBlock {
+            self.endUpdates()
+        }
+        if exception != nil {
+            CacheTrackerConsumer_tryBlock {
+                self.reloadData()
+            }
+        }
     }
 
 }

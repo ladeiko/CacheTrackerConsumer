@@ -167,7 +167,6 @@
 				12C6E7241FBB076D008891C3 /* Frameworks */,
 				12C6E7251FBB076D008891C3 /* Resources */,
 				30A569BD81B0C9A062C0E787 /* [CP] Embed Pods Frameworks */,
-				40FFA5F76BB9E03A0C5DAE65 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -186,8 +185,6 @@
 				12C6E73C1FBB0FE7008891C3 /* Sources */,
 				12C6E73D1FBB0FE7008891C3 /* Frameworks */,
 				12C6E73E1FBB0FE7008891C3 /* Resources */,
-				75EEBC54A384D9BEA21C0AD9 /* [CP] Embed Pods Frameworks */,
-				6C2E80534526C26CBFD4D4FE /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -286,51 +283,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-Demo/Pods-Demo-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		40FFA5F76BB9E03A0C5DAE65 /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "[CP] Copy Pods Resources";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-Demo/Pods-Demo-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		6C2E80534526C26CBFD4D4FE /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "[CP] Copy Pods Resources";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-CacheTrackerSectionedConsumerTests/Pods-CacheTrackerSectionedConsumerTests-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		75EEBC54A384D9BEA21C0AD9 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-CacheTrackerSectionedConsumerTests/Pods-CacheTrackerSectionedConsumerTests-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		82030CA4BBAF97D358BA2558 /* [CP] Check Pods Manifest.lock */ = {

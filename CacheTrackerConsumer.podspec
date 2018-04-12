@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
     s.name = 'CacheTrackerConsumer'
-    s.version = '1.3.0'
+    s.version = '1.3.1'
     s.summary = 'Helper classes to connect UI and CacheTracker'
     s.homepage = 'https://github.com/ladeiko/CacheTrackerConsumer'
     s.license = { :type => 'CUSTOM', :file => 'LICENSE' }
@@ -16,7 +16,7 @@ Pod::Spec.new do |s|
     end
 
     s.subspec 'UIKit' do |s|
-        s.source_files = [ 'Classes/Core/**/*.{swift}', 'Classes/UIKit/**/*.{swift}' ]
+        s.source_files = [ 'Classes/Core/**/*.{swift}', 'Classes/UIKit/**/*.{swift,h}' ]
         s.frameworks = 'UIKit'
         s.dependency 'CacheTracker'
     end

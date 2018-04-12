@@ -63,18 +63,26 @@ extension UICollectionViewController: CacheTrackerPlainConsumerDelegate {
             return
         }
         
-        self.collectionView!.performBatchUpdates({
-            for update in updates {
-                switch update.type {
-                case .itemInsert:
-                    self.collectionView!.insertItems(at: [IndexPath(row: update.index, section: cacheTrackerSectionOffset)])
-                case .itemDelete:
-                    self.collectionView!.deleteItems(at: [IndexPath(row: update.index, section: cacheTrackerSectionOffset)])
-                case .itemUpdate:
-                    self.collectionView!.reloadItems(at: [IndexPath(row: update.index, section: cacheTrackerSectionOffset)])
+        let exception = CacheTrackerConsumer_tryBlock {
+            self.collectionView!.performBatchUpdates({
+                for update in updates {
+                    switch update.type {
+                    case .itemInsert:
+                        self.collectionView!.insertItems(at: [IndexPath(row: update.index, section: self.cacheTrackerSectionOffset)])
+                    case .itemDelete:
+                        self.collectionView!.deleteItems(at: [IndexPath(row: update.index, section: self.cacheTrackerSectionOffset)])
+                    case .itemUpdate:
+                        self.collectionView!.reloadItems(at: [IndexPath(row: update.index, section: self.cacheTrackerSectionOffset)])
+                    }
                 }
+            }, completion: nil)
+        }
+        
+        if exception != nil {
+            CacheTrackerConsumer_tryBlock {
+                self.collectionView!.reloadData()
             }
-        }, completion: nil)
+        }
     }
 
 }

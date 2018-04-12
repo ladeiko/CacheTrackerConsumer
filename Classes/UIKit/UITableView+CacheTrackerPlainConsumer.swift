@@ -26,7 +26,14 @@ extension UITableView: CacheTrackerPlainConsumerDelegate {
     }
     
     open func cacheTrackerPlainConsumerEndUpdates() {
-        endUpdates()
+        let exception = CacheTrackerConsumer_tryBlock {
+            self.endUpdates()
+        }
+        if exception != nil {
+            CacheTrackerConsumer_tryBlock {
+                self.reloadData()
+            }
+        }
     }
 
 }

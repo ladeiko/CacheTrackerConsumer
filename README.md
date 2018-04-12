@@ -4,6 +4,10 @@ Helper classes for use as mediator between [CacheTracker](https://github.com/lad
 
 ## Changes
 
+### v1.3.1
+
+* Add dispatching of Objective-C try/catch while applyting changes to UICollectionView/UITableView. Now if any exception is generated while update, then view is reloaded with 'reloadData'.
+
 ### v1.3.0
 
 * Add

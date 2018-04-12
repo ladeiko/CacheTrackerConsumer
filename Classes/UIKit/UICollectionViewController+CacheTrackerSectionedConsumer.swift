@@ -79,24 +79,32 @@ extension UICollectionViewController: CacheTrackerSectionedConsumerDelegate {
             return
         }
         
-        self.collectionView!.performBatchUpdates({
-            for update in updates {
-                switch update.type {
-                case .sectionInsert:
-                    self.collectionView!.insertSections(IndexSet(integer: update.sectionIndex!))
-                case .sectionDelete:
-                    self.collectionView!.deleteSections(IndexSet(integer: update.sectionIndex!))
-                case .sectionUpdate:
-                    self.collectionView!.reloadSections(IndexSet(integer: update.sectionIndex!))
-                case .itemInsert:
-                    self.collectionView!.insertItems(at: [update.itemIndex!])
-                case .itemDelete:
-                    self.collectionView!.deleteItems(at: [update.itemIndex!])
-                case .itemUpdate:
-                    self.collectionView!.reloadItems(at: [update.itemIndex!])
+        let exception = CacheTrackerConsumer_tryBlock {
+            self.collectionView!.performBatchUpdates({
+                for update in updates {
+                    switch update.type {
+                    case .sectionInsert:
+                        self.collectionView!.insertSections(IndexSet(integer: update.sectionIndex!))
+                    case .sectionDelete:
+                        self.collectionView!.deleteSections(IndexSet(integer: update.sectionIndex!))
+                    case .sectionUpdate:
+                        self.collectionView!.reloadSections(IndexSet(integer: update.sectionIndex!))
+                    case .itemInsert:
+                        self.collectionView!.insertItems(at: [update.itemIndex!])
+                    case .itemDelete:
+                        self.collectionView!.deleteItems(at: [update.itemIndex!])
+                    case .itemUpdate:
+                        self.collectionView!.reloadItems(at: [update.itemIndex!])
+                    }
                 }
+            }, completion: nil)
+        }
+        
+        if exception != nil {
+            CacheTrackerConsumer_tryBlock {
+                self.collectionView!.reloadData()
             }
-        }, completion: nil)
+        }
     }
 
 }
