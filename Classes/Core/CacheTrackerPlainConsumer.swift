@@ -63,11 +63,17 @@ public protocol CacheTrackerPlainConsumerDelegate {
 
     // Usefull for UITableView
     func cacheTrackerPlainConsumerEndUpdates()
+    
+}
+
+public protocol CacheTrackerPlainConsumerUpdatableItem {
+    func onWillUpdate(target item: Any)
 }
 
 open class CacheTrackerPlainConsumer<T: CacheTrackerPlainModel>: NSObject {
     
     private class IndexOperation {
+        weak var linkedIO: IndexOperation?
         let index: Int
         
         init(_ index: Int) {
@@ -91,6 +97,7 @@ open class CacheTrackerPlainConsumer<T: CacheTrackerPlainModel>: NSObject {
     
     private class ItemOperation: IndexOperation {
         let item: T
+        var movedItem: T?
         init(_ item: T, at index: Int) {
             self.item = item
             super.init(index)
@@ -151,13 +158,22 @@ open class CacheTrackerPlainConsumer<T: CacheTrackerPlainModel>: NSObject {
         _adds.append(ItemOperation(item, at: linearItemIndex))
     }
     
-    private func _add(_ item: T, at linearItemIndex: Int) {
+    private func addForMove(_ item: T, at linearItemIndex: Int) -> IndexOperation {
+        precondition(_trackChanges)
+        let io = ItemOperation(item, at: linearItemIndex)
+        _adds.append(io)
+        return io
+    }
+    
+    private func _add(_ item: T, at linearItemIndex: Int, accumulate: Bool) {
         
         precondition(_trackChanges)
         precondition(linearItemIndex >= 0 && linearItemIndex <= _items.count)
         
         _items.insert(item, at: linearItemIndex)
-        _insertedItems.append(linearItemIndex)
+        if (accumulate) {
+            _insertedItems.append(linearItemIndex)
+        }
     }
     
     open func update(_ item: T, at linearItemIndex: Int) {
@@ -165,11 +181,15 @@ open class CacheTrackerPlainConsumer<T: CacheTrackerPlainModel>: NSObject {
         _updates.append(ItemOperation(item, at: linearItemIndex))
     }
     
-    private func _update(_ item: T, at linearItemIndex: Int) {
+    private func _update(_ item: T, at linearItemIndex: Int, accumulate: Bool) {
         precondition(_trackChanges)
-        // NOTE: just update, no any section keys comparing
+        if let updatable = item as? CacheTrackerPlainConsumerUpdatableItem {
+            updatable.onWillUpdate(target: _items[linearItemIndex])
+        }
         _items[linearItemIndex] = item
-        _updatedItems.append(linearItemIndex)
+        if (accumulate) {
+            _updatedItems.append(linearItemIndex)
+        }
     }
     
     open func remove(at linearItemIndex: Int) {
@@ -177,10 +197,19 @@ open class CacheTrackerPlainConsumer<T: CacheTrackerPlainModel>: NSObject {
         _deletions.append(IndexOperation(linearItemIndex))
     }
     
-    private func _remove(at linearItemIndex: Int) {
+    private func removeForMove(at linearItemIndex: Int) -> IndexOperation {
         precondition(_trackChanges)
-        _removedItems.append(linearItemIndex)
+        let io = IndexOperation(linearItemIndex)
+        _deletions.append(io)
+        return io
+    }
+    
+    private func _remove(at linearItemIndex: Int, accumulate: Bool) {
+        precondition(_trackChanges)
         _items.remove(at: linearItemIndex)
+        if (accumulate) {
+            _removedItems.append(linearItemIndex)
+        }
     }
     
     open func willChange() {
@@ -192,6 +221,7 @@ open class CacheTrackerPlainConsumer<T: CacheTrackerPlainModel>: NSObject {
     open func didChange(returnChanges: Bool = false) -> CacheTrackerPlainConsumerChanges? {
         
         var changes: CacheTrackerPlainConsumerChanges?
+        let accumulate: Bool = returnChanges || (self.delegate != nil)
         
         let job: () -> Void = {
             
@@ -199,65 +229,76 @@ open class CacheTrackerPlainConsumer<T: CacheTrackerPlainModel>: NSObject {
             
             self.delegate?.cacheTrackerPlainConsumerBeginUpdates()
             
-            self._updatedItems = [Int]()
-            self._removedItems = [Int]()
-            self._insertedItems = [Int]()
+            if accumulate {
+                self._updatedItems = [Int]()
+                self._removedItems = [Int]()
+                self._insertedItems = [Int]()
+            }
             
             self._deletions.sort(by: IndexOperation.comparator(true))
             self._adds.sort(by: IndexOperation.comparator())
             self._updates.sort(by: IndexOperation.comparator())
             
             for o in self._updates {
-                self._update(o.item, at: o.index)
+                self._update(o.item, at: o.index, accumulate: accumulate)
             }
             
             self._updates.removeAll()
             
             for o in self._deletions {
-                self._remove(at: o.index)
+                if let linkedIO = o.linkedIO as? ItemOperation {
+                    linkedIO.movedItem = self._items[o.index]
+                }
+                self._remove(at: o.index, accumulate: accumulate)
             }
             
             self._deletions.removeAll()
             
             for o in self._adds {
-                self._add(o.item, at: o.index)
+                self._add(o.item, at: o.index, accumulate: accumulate)
             }
             
             self._adds.removeAll()
             
-            self._updatedItems.sort { (a, b) -> Bool in
-                return a <= b
+            if accumulate {
+                
+                self._updatedItems.sort { (a, b) -> Bool in
+                    return a <= b
+                }
+                
+                self._removedItems.sort { (a, b) -> Bool in
+                    return a >= b
+                }
+                
+                self._insertedItems.sort { (a, b) -> Bool in
+                    return a <= b
+                }
+                
+                if let delegate = self.delegate {
+                    
+                    for i in self._updatedItems {
+                        delegate.cacheTrackerPlainConsumerDidUpdateItem(at: i)
+                    }
+                    
+                    for i in self._removedItems {
+                        delegate.cacheTrackerPlainConsumerDidRemoveItem(at: i)
+                    }
+                    
+                    for i in self._insertedItems {
+                        delegate.cacheTrackerPlainConsumerDidInsertItem(at: i)
+                    }
+                }
+                
+                if returnChanges {
+                    changes = CacheTrackerPlainConsumerChanges(updatedRows: self._updatedItems,
+                                                               deletedRows: self._removedItems,
+                                                               insertedRows: self._insertedItems)
+                }
+                
+                self._removedItems = nil
+                self._insertedItems = nil
+                self._updatedItems = nil
             }
-            
-            self._removedItems.sort { (a, b) -> Bool in
-                return a >= b
-            }
-            
-            self._insertedItems.sort { (a, b) -> Bool in
-                return a <= b
-            }
-            
-            for i in self._updatedItems {
-                self.delegate?.cacheTrackerPlainConsumerDidUpdateItem(at: i)
-            }
-            
-            for i in self._removedItems {
-                self.delegate?.cacheTrackerPlainConsumerDidRemoveItem(at: i)
-            }
-            
-            for i in self._insertedItems {
-                self.delegate?.cacheTrackerPlainConsumerDidInsertItem(at: i)
-            }
-            
-            if returnChanges {
-                changes = CacheTrackerPlainConsumerChanges(updatedRows: self._updatedItems,
-                                                       deletedRows: self._removedItems,
-                                                       insertedRows: self._insertedItems)
-            }
-            
-            self._removedItems = nil
-            self._insertedItems = nil
-            self._updatedItems = nil
             
             self._trackChanges = false
             
@@ -296,8 +337,9 @@ open class CacheTrackerPlainConsumer<T: CacheTrackerPlainModel>: NSObject {
             case .update:
                 update(transaction.model! as! T, at: transaction.index!)
             case .move:
-                remove(at: transaction.index!)
-                add(transaction.model! as! T, at: transaction.newIndex!)
+                let delIO = removeForMove(at: transaction.index!)
+                let addIO = addForMove(transaction.model! as! T, at: transaction.newIndex!)
+                delIO.linkedIO = addIO
             }
         }
     }
