@@ -10,7 +10,6 @@ target 'Demo' do
   pod 'CacheTracker/CoreData'
   pod 'CacheTrackerConsumer', :path => ‘./..’
   pod 'CacheTrackerConsumer/UIKit', :path => ‘./..’
-  pod 'RandomKit'
 
   target 'CacheTrackerSectionedConsumerTests' do
     inherit! :search_paths

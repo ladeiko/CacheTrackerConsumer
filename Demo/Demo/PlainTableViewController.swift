@@ -9,7 +9,6 @@
 import UIKit
 import CacheTracker
 import MagicalRecord
-import RandomKit
 import CacheTrackerConsumer
 
 class PlainTableViewController: UITableViewController, CacheTrackerDelegate {
@@ -31,7 +30,7 @@ class PlainTableViewController: UITableViewController, CacheTrackerDelegate {
         
         if timer == nil {
             timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true, block: { (timer) in
-                let value = UInt.random(using: &Xoroshiro.default) % 4
+                let value = UInt.random() % 4
                 
                 switch value {
                 case 0:
@@ -41,7 +40,7 @@ class PlainTableViewController: UITableViewController, CacheTrackerDelegate {
                             if CoreDataItem.mr_countOfEntities(with: context) > 10 {
                                 return
                             }
-                            let value = UInt.random(using: &Xoroshiro.default)
+                            let value = UInt.random()
                             let item = CoreDataItem.mr_createEntity(in: context)!
                             item.name = "\(value)"
                             item.section = String(item.name!.prefix(1))
@@ -55,7 +54,7 @@ class PlainTableViewController: UITableViewController, CacheTrackerDelegate {
                             let items = CoreDataItem.mr_findAll(with: NSPredicate(value: true), in: context)!
                             let count = items.count
                             if  count > 1 {
-                                let target = abs(Int.random(using: &Xoroshiro.default)) % count
+                                let target = abs(Int.random()) % count
                                 items[target].mr_deleteEntity(in: context)
                             }
                         })
@@ -71,8 +70,8 @@ class PlainTableViewController: UITableViewController, CacheTrackerDelegate {
                             let items = CoreDataItem.mr_findAll(with: NSPredicate(value: true), in: context)!
                             let count = items.count
                             if  count > 1 {
-                                let target = abs(Int.random(using: &Xoroshiro.default)) % count
-                                let value = UInt.random(using: &Xoroshiro.default)
+                                let target = abs(Int.random()) % count
+                                let value = UInt.random()
                                 let item = items[target] as! CoreDataItem
                                 item.name = "\(value)"
                                 item.section = String(item.name!.prefix(1))
@@ -91,7 +90,7 @@ class PlainTableViewController: UITableViewController, CacheTrackerDelegate {
             CoreDataItem.mr_deleteAll(matching: NSPredicate(value: true), in: context)
             for _ in 0..<3 {
                 let item = CoreDataItem.mr_createEntity(in: context)!
-                let value = UInt.random(using: &Xoroshiro.default)
+                let value = UInt.random()
                 item.name = "\(value)"
                 item.section = String(item.name!.prefix(1))
             }
