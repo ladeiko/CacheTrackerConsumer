@@ -8,6 +8,10 @@
 
 /* Begin PBXBuildFile section */
 		0C5B93B99D879F27406566BE /* Pods_Demo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 990D54980DE25B0519BDB20A /* Pods_Demo.framework */; };
+		1209A05420E0DCB80068DBC8 /* CacheTrackerPlainConsumerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1209A05320E0DCB80068DBC8 /* CacheTrackerPlainConsumerTests.swift */; };
+		1209A05620E0E6AA0068DBC8 /* TestItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1209A05520E0E6AA0068DBC8 /* TestItem.swift */; };
+		1209A05820E0EA120068DBC8 /* CacheTrackerPlainRecurrentConsumerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1209A05720E0EA120068DBC8 /* CacheTrackerPlainRecurrentConsumerTests.swift */; };
+		1209A05A20E0EA580068DBC8 /* RecurrentTestItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1209A05920E0EA580068DBC8 /* RecurrentTestItem.swift */; };
 		1216B4A71FBC095E0084CCEA /* Model.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 1216B4A21FBC095E0084CCEA /* Model.xcdatamodeld */; };
 		1216B4A81FBC095E0084CCEA /* CoreDataItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1216B4A41FBC095E0084CCEA /* CoreDataItem.swift */; };
 		1216B4A91FBC095E0084CCEA /* SectionedTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1216B4A51FBC095E0084CCEA /* SectionedTableViewController.swift */; };
@@ -39,6 +43,10 @@
 
 /* Begin PBXFileReference section */
 		002E0B92E6BD7CD972D91D15 /* Pods-CacheTrackerSectionedConsumerTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CacheTrackerSectionedConsumerTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-CacheTrackerSectionedConsumerTests/Pods-CacheTrackerSectionedConsumerTests.release.xcconfig"; sourceTree = "<group>"; };
+		1209A05320E0DCB80068DBC8 /* CacheTrackerPlainConsumerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CacheTrackerPlainConsumerTests.swift; sourceTree = "<group>"; };
+		1209A05520E0E6AA0068DBC8 /* TestItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestItem.swift; sourceTree = "<group>"; };
+		1209A05720E0EA120068DBC8 /* CacheTrackerPlainRecurrentConsumerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CacheTrackerPlainRecurrentConsumerTests.swift; sourceTree = "<group>"; };
+		1209A05920E0EA580068DBC8 /* RecurrentTestItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RecurrentTestItem.swift; sourceTree = "<group>"; };
 		1216B4A31FBC095E0084CCEA /* Model.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Model.xcdatamodel; sourceTree = "<group>"; };
 		1216B4A41FBC095E0084CCEA /* CoreDataItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreDataItem.swift; sourceTree = "<group>"; };
 		1216B4A51FBC095E0084CCEA /* SectionedTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SectionedTableViewController.swift; sourceTree = "<group>"; };
@@ -129,7 +137,11 @@
 			children = (
 				12C6E7481FBB1011008891C3 /* TestModel.swift */,
 				12C6E74A1FBB1011008891C3 /* SectionedTestItem.swift */,
+				1209A05520E0E6AA0068DBC8 /* TestItem.swift */,
+				1209A05920E0EA580068DBC8 /* RecurrentTestItem.swift */,
 				12C6E7511FBB152A008891C3 /* SectionedTableView.swift */,
+				1209A05320E0DCB80068DBC8 /* CacheTrackerPlainConsumerTests.swift */,
+				1209A05720E0EA120068DBC8 /* CacheTrackerPlainRecurrentConsumerTests.swift */,
 				12C6E7531FBB15E3008891C3 /* CoreDataCacheTrackerSectionedConsumer.swift */,
 				12C6E7491FBB1011008891C3 /* CacheTrackerSectionedConsumerTests.swift */,
 				12C6E74B1FBB1011008891C3 /* CacheTrackerSectionedConsumerTests.xcdatamodeld */,
@@ -387,12 +399,16 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1209A05620E0E6AA0068DBC8 /* TestItem.swift in Sources */,
 				12C6E74F1FBB1011008891C3 /* SectionedTestItem.swift in Sources */,
 				12C6E7541FBB15E3008891C3 /* CoreDataCacheTrackerSectionedConsumer.swift in Sources */,
 				12C6E7521FBB152A008891C3 /* SectionedTableView.swift in Sources */,
 				12C6E74D1FBB1011008891C3 /* TestModel.swift in Sources */,
+				1209A05420E0DCB80068DBC8 /* CacheTrackerPlainConsumerTests.swift in Sources */,
+				1209A05820E0EA120068DBC8 /* CacheTrackerPlainRecurrentConsumerTests.swift in Sources */,
 				12C6E7501FBB1011008891C3 /* CacheTrackerSectionedConsumerTests.xcdatamodeld in Sources */,
 				12C6E74E1FBB1011008891C3 /* CacheTrackerSectionedConsumerTests.swift in Sources */,
+				1209A05A20E0EA580068DBC8 /* RecurrentTestItem.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -66,13 +66,57 @@ public protocol CacheTrackerPlainConsumerDelegate {
     
 }
 
-public protocol CacheTrackerPlainConsumerUpdatableItem {
-    func onWillUpdate(target item: Any)
+public protocol CacheTrackerPlainRecurrentConsumerItem: CacheTrackerPlainModel {
+    
+    // Special function is called when item is moved / updated with new value,
+    // here you can copy some properties from old value if required to new one,
+    // this can be usefull if some of properties should be kept the same since item creation:
+    //
+    //  class Man: CacheTrackerPlainRecurrentConsumerItem {
+    //
+    //      let personalNumber: String      // this value should be stay the same
+    //      let firstName: String           // can change
+    //      let lastName: String            // can change
+    //
+    //      init(personalNumber: String, firstName: String, lastName: String) {
+    //          self.personalNumber = personalNumber
+    //          self.firstName = firstName
+    //          self.lastName = lastName
+    //      }
+    //
+    //      // MARK: CacheTrackerPlainModel
+    //
+    //      init() {
+    //          personalNumber = ""
+    //          firstName = ""
+    //          lastName = ""
+    //      }
+    //
+    //      // MARK: CacheTrackerPlainRecurrentConsumerItem
+    //
+    //      func recurrentPlainConsumerItem(using oldValue: CacheTrackerPlainRecurrentConsumerItem) -> CacheTrackerPlainRecurrentConsumerItem {
+    //          let oldValue = oldValue as! Man
+    //          // Even if item is updated its 'personalNumber' will have the same value since it first time appeared in consumer.
+    //          return Man(personalNumber: oldValue.personalNumber, firstName: firstName, lastName: lastName)
+    //      }
+    //  }
+    //
+    //
+    func recurrentPlainConsumerItem(using oldValue: CacheTrackerPlainRecurrentConsumerItem) -> CacheTrackerPlainRecurrentConsumerItem
+}
+
+extension CacheTrackerPlainRecurrentConsumerItem {
+    
+    // Default implementation returns item itself
+    func recurrentPlainConsumerItem(using oldValue: CacheTrackerPlainRecurrentConsumerItem) -> CacheTrackerPlainRecurrentConsumerItem {
+        return self
+    }
+    
 }
 
 open class CacheTrackerPlainConsumer<T: CacheTrackerPlainModel>: NSObject {
     
-    private class IndexOperation {
+    fileprivate class IndexOperation {
         weak var linkedIO: IndexOperation?
         let index: Int
         
@@ -95,7 +139,7 @@ open class CacheTrackerPlainConsumer<T: CacheTrackerPlainModel>: NSObject {
         
     }
     
-    private class ItemOperation: IndexOperation {
+    fileprivate class ItemOperation: IndexOperation {
         let item: T
         var movedItem: T?
         init(_ item: T, at index: Int) {
@@ -109,8 +153,8 @@ open class CacheTrackerPlainConsumer<T: CacheTrackerPlainModel>: NSObject {
     private var _adds: [ItemOperation] = [ItemOperation]()
     private var _deletions: [IndexOperation] = [IndexOperation]()
     private var _updates: [ItemOperation] = [ItemOperation]()
-    private var _trackChanges = false
-    private var _items: [T] = [T]()
+    fileprivate var _trackChanges = false
+    fileprivate var _items: [T] = [T]()
     private var _updatedItems: [Int]!
     private var _removedItems: [Int]!
     private var _insertedItems: [Int]!
@@ -165,7 +209,7 @@ open class CacheTrackerPlainConsumer<T: CacheTrackerPlainModel>: NSObject {
         return io
     }
     
-    private func _add(_ item: T, at linearItemIndex: Int, accumulate: Bool) {
+    fileprivate func _add(op: ItemOperation, _ item: T, at linearItemIndex: Int, accumulate: Bool) {
         
         precondition(_trackChanges)
         precondition(linearItemIndex >= 0 && linearItemIndex <= _items.count)
@@ -181,11 +225,8 @@ open class CacheTrackerPlainConsumer<T: CacheTrackerPlainModel>: NSObject {
         _updates.append(ItemOperation(item, at: linearItemIndex))
     }
     
-    private func _update(_ item: T, at linearItemIndex: Int, accumulate: Bool) {
+    fileprivate func _update(_ item: T, at linearItemIndex: Int, accumulate: Bool) {
         precondition(_trackChanges)
-        if let updatable = item as? CacheTrackerPlainConsumerUpdatableItem {
-            updatable.onWillUpdate(target: _items[linearItemIndex])
-        }
         _items[linearItemIndex] = item
         if (accumulate) {
             _updatedItems.append(linearItemIndex)
@@ -210,6 +251,12 @@ open class CacheTrackerPlainConsumer<T: CacheTrackerPlainModel>: NSObject {
         if (accumulate) {
             _removedItems.append(linearItemIndex)
         }
+    }
+    
+    open func move(_ item: T, from srcIndex: Int, to dstIndex: Int) {
+        let delIO = removeForMove(at: srcIndex)
+        let addIO = addForMove(item, at: dstIndex)
+        delIO.linkedIO = addIO
     }
     
     open func willChange() {
@@ -255,7 +302,7 @@ open class CacheTrackerPlainConsumer<T: CacheTrackerPlainModel>: NSObject {
             self._deletions.removeAll()
             
             for o in self._adds {
-                self._add(o.item, at: o.index, accumulate: accumulate)
+                self._add(op: o, o.item, at: o.index, accumulate: accumulate)
             }
             
             self._adds.removeAll()
@@ -337,10 +384,26 @@ open class CacheTrackerPlainConsumer<T: CacheTrackerPlainModel>: NSObject {
             case .update:
                 update(transaction.model! as! T, at: transaction.index!)
             case .move:
-                let delIO = removeForMove(at: transaction.index!)
-                let addIO = addForMove(transaction.model! as! T, at: transaction.newIndex!)
-                delIO.linkedIO = addIO
+                move(transaction.model! as! T, from: transaction.index!, to: transaction.newIndex!)
             }
         }
     }
 }
+
+open class CacheTrackerPlainRecurrentConsumer<T: CacheTrackerPlainRecurrentConsumerItem>: CacheTrackerPlainConsumer<T> {
+    
+    override fileprivate func _update(_ item: T, at linearItemIndex: Int, accumulate: Bool) {
+        let newValue = item.recurrentPlainConsumerItem(using: _items[linearItemIndex]) as! T
+        super._update(newValue, at: linearItemIndex, accumulate: accumulate)
+    }
+    
+    override fileprivate func _add(op: ItemOperation, _ item: T, at linearItemIndex: Int, accumulate: Bool) {
+        var newValue = item
+        if let movedItem = op.movedItem {
+            newValue = item.recurrentPlainConsumerItem(using: movedItem) as! T
+        }
+        super._add(op: op, newValue, at: linearItemIndex, accumulate: accumulate)
+    }
+    
+}
+

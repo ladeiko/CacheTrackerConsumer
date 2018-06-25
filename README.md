@@ -4,51 +4,66 @@ Helper classes for use as mediator between [CacheTracker](https://github.com/lad
 
 ## Changes
 
-### v1.4.0
-
-* Add 'cacheTrackerSectionedConsumerBatchUpdates' to both consumer delegates. This helps to implemented proper interaction with UICollectionView - apply all changes from 'performBatchUpdates'.
-
-### v1.3.1
-
-* Add dispatching of Objective-C try/catch while applyting changes to UICollectionView/UITableView. Now if any exception is generated while update, then view is reloaded with 'reloadData'.
-
-### v1.3.0
-
-* Add
-
-```swift 
-open func items() -> [T]
-```
-and 
-
-```swift 
-func indexOfItem(by comparator: (_ item: T) -> Bool) -> Int?
-``` 
-
-to CacheTrackerPlainConsumer
-  
-### v1.2.0
-
-* New properties:
-  * var cacheTrackerItemsOffset: Int = 0 (used only in plain mode)
-  * var cacheTrackerSectionOffset: Int = 0 (used in both modes)
-  
-### v1.1.0
-
- * Changes signature of method **reset()*:
-
- ```swift
- open func reset<P>(with transactions: [CacheTransaction<P>] = [CacheTransaction<P>](), 
- 		notifyingDelegate: Bool = false)
- ```
-If notifyingDelegate is false (by default), then you should reload your table or collection view after calling this
-method.
+See [CHANGELOG](CHANGELOG.md)
 
 ## Types
 
 ### CacheTrackerPlainConsumer
 
 Just keep plain items in linear array in sync with cache tracker storage and generates updates for UI controls.
+
+### CacheTrackerPlainRecurrentConsumer
+
+Works like CacheTrackerPlainConsumer, the only difference: whne some item is updated or moved to another index, then you can save some properties from old value to new one, this can be usefull, for example, when you add new 'man' object to array with 'personal number', this number should not be changed until item is deleted from array, other fields can change:
+
+```swift
+class Man: CacheTrackerPlainRecurrentConsumerItem {
+    
+  let personalNumber: String      // this value should be stay the same
+  let firstName: String           // can change
+  let lastName: String            // can change
+
+  init(personalNumber: String, firstName: String, lastName: String) {
+  	self.personalNumber = personalNumber
+  	self.firstName = firstName
+  	self.lastName = lastName
+  }
+    
+  // MARK: CacheTrackerPlainModel
+  
+  init() {
+  	personalNumber = ""
+  	firstName = ""
+  	lastName = ""
+  }
+  
+  // MARK: CacheTrackerPlainRecurrentConsumerItem
+  
+  func recurrentPlainConsumerItem(using oldValue: CacheTrackerPlainRecurrentConsumerItem) -> CacheTrackerPlainRecurrentConsumerItem {
+      let oldValue = oldValue as! Man
+      // Even if item is updated its 'personalNumber' will have the same value since it first time appeared in consumer.
+      return Man(personalNumber: oldValue.personalNumber, firstName: firstName, lastName: lastName)
+  }
+  
+}
+
+
+let consumer = CacheTrackerPlainRecurrentConsumer<Man>()
+consumer.willChange()
+consumer.add(Man(personalNumber: "123", firstName:"John", lastName:"Smith"), at: 0)
+consumer.didChange()
+
+consumer.willChange()
+// NOTE: new value "456" will be ignored
+consumer.update(Man(personalNumber: "456", firstName:"John", lastName:"Smith"), at: 0) 
+consumer.didChange()
+
+let personalNumber = consumer.object(at: 0).personalNumber
+
+// will print '123', NOT '456'
+print(personalNumber) 
+
+``` 
 
 ### CacheTrackerSectionedConsumer
 
