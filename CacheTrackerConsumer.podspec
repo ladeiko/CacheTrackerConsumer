@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
     s.name = 'CacheTrackerConsumer'
-    s.version = '1.5.0'
+    s.version = '1.5.1'
     s.summary = 'Helper classes to connect UI and CacheTracker (https://github.com/ladeiko/CacheTracker)'
     s.homepage = 'https://github.com/ladeiko/CacheTrackerConsumer'
     s.license = { :type => 'CUSTOM', :file => 'LICENSE' }

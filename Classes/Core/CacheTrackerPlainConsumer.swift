@@ -10,9 +10,9 @@ import CacheTracker
 
 @objc open class CacheTrackerPlainConsumerChanges: NSObject {
     
-    open let updatedRows: [Int]!
-    open let deletedRows: [Int]!
-    open let insertedRows: [Int]!
+    public let updatedRows: [Int]!
+    public let deletedRows: [Int]!
+    public let insertedRows: [Int]!
     
     init(updatedRows: [Int], deletedRows: [Int], insertedRows: [Int]) {
         self.updatedRows = updatedRows

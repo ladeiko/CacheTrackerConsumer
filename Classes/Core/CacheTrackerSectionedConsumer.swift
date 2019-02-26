@@ -14,12 +14,12 @@ public protocol CacheTrackerSectionedConsumerModel {
 
 @objc open class CacheTrackerSectionedConsumerChanges: NSObject {
     
-    open let updatedRows: [IndexPath]!
-    open let reloadedSections: [Int]!
-    open let deletedSections: [Int]!
-    open let insertedSections: [Int]!
-    open let deletedRows: [IndexPath]!
-    open let insertedRows: [IndexPath]!
+    public let updatedRows: [IndexPath]!
+    public let reloadedSections: [Int]!
+    public let deletedSections: [Int]!
+    public let insertedSections: [Int]!
+    public let deletedRows: [IndexPath]!
+    public let insertedRows: [IndexPath]!
     
     init(updatedRows: [IndexPath], reloadedSections: [Int], deletedSections: [Int], insertedSections: [Int], deletedRows: [IndexPath], insertedRows: [IndexPath]) {
         self.updatedRows = updatedRows
