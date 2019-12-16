@@ -9,6 +9,7 @@ Pod::Spec.new do |s|
     s.source = { :git => 'https://github.com/ladeiko/CacheTrackerConsumer.git', :tag => "#{s.version}" }
     s.requires_arc = true
     s.default_subspec = 'Core'
+    s.swift_versions = ['4.0', '4.2', '5.0', '5.1']
 
     s.subspec 'Core' do |s|
         s.source_files = 'Classes/Core/**/*.{swift}'
