@@ -223,10 +223,12 @@
 				TargetAttributes = {
 					12C6E7261FBB076D008891C3 = {
 						CreatedOnToolsVersion = 9.0;
+						LastSwiftMigration = 1130;
 						ProvisioningStyle = Automatic;
 					};
 					12C6E73F1FBB0FE7008891C3 = {
 						CreatedOnToolsVersion = 9.0;
+						LastSwiftMigration = 1130;
 						ProvisioningStyle = Automatic;
 						TestTargetID = 12C6E7261FBB076D008891C3;
 					};
@@ -278,7 +280,7 @@
 			files = (
 			);
 			inputPaths = (
-				"${SRCROOT}/Pods/Target Support Files/Pods-Demo/Pods-Demo-frameworks.sh",
+				"${PODS_ROOT}/Target Support Files/Pods-Demo/Pods-Demo-frameworks.sh",
 				"${BUILT_PRODUCTS_DIR}/CacheTracker/CacheTracker.framework",
 				"${BUILT_PRODUCTS_DIR}/CacheTrackerConsumer/CacheTrackerConsumer.framework",
 				"${BUILT_PRODUCTS_DIR}/HeckelDiff/HeckelDiff.framework",
@@ -293,7 +295,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-Demo/Pods-Demo-frameworks.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Demo/Pods-Demo-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		82030CA4BBAF97D358BA2558 /* [CP] Check Pods Manifest.lock */ = {

@@ -98,7 +98,14 @@ extension UICollectionView: CacheTrackerSectionedConsumerDelegate {
             case .itemDelete:
                 self.deleteItems(at: [update.itemIndex!])
             case .itemUpdate:
-                self.reloadItems(at: [update.itemIndex!])
+                
+                let indexPath = update.itemIndex!
+                
+                if let onReload = self.cacheTrackerOnReloadBlock, !onReload(indexPath) {
+                    break
+                }
+                
+                self.reloadItems(at: [indexPath])
             }
         }
     }

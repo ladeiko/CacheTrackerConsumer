@@ -18,7 +18,6 @@ extension String {
         let idx2 = index(startIndex, offsetBy: range.upperBound)
         return String(self[idx1..<idx2])
     }
-    var count: Int { return characters.count }
 }
 
 @objc(CacheTrackerSectionedConsumerTests)
@@ -1493,8 +1492,8 @@ class CacheTrackerSectionedConsumerTests: XCTestCase {
                         default:
                             let p = change.components(separatedBy: "->")
                             XCTAssertTrue(p.count == 2)
-                            let was = String(p[0])!
-                            let became = String(p[1])!
+                            let was = String(p[0])
+                            let became = String(p[1])
                             let item = TestModel.mr_findFirst(with: NSPredicate(format: "name = %@", was), in: context)!
                             moves.add([item, became])
                         }

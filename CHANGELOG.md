@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.6.0
+### Added
+* cacheTrackerOnReloadBlock var to table view and collection view
+
 ## 1.5.0
 ### Added
 * CacheTrackerPlainRecurrentConsumer class and CacheTrackerPlainRecurrentConsumerItem protocol

@@ -14,7 +14,14 @@ extension UITableViewController: CacheTrackerPlainConsumerDelegate {
     }
     
     open func cacheTrackerPlainConsumerDidUpdateItem(at index: Int) {
-        self.tableView.reloadRows(at: [IndexPath(row: index + cacheTrackerItemsOffset, section: cacheTrackerSectionOffset)], with: .fade)
+        
+        let indexPath = IndexPath(row: index + cacheTrackerItemsOffset, section: cacheTrackerSectionOffset)
+        
+        if let onReload = self.tableView.cacheTrackerOnReloadBlock, !onReload(indexPath) {
+            return
+        }
+        
+        self.tableView.reloadRows(at: [indexPath], with: .fade)
     }
     
     open func cacheTrackerPlainConsumerDidRemoveItem(at index: Int) {

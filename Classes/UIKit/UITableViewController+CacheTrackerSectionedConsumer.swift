@@ -26,7 +26,14 @@ extension UITableViewController: CacheTrackerSectionedConsumerDelegate {
     }
     
     open func cacheTrackerSectionedConsumerDidUpdateItem(at indexPath: IndexPath) {
-        self.tableView.reloadRows(at: [IndexPath(row: indexPath.row, section: indexPath.section + cacheTrackerSectionOffset)], with: .fade)
+        
+        let indexPath = IndexPath(row: indexPath.row, section: indexPath.section + cacheTrackerSectionOffset)
+        
+        if let onReload = self.tableView.cacheTrackerOnReloadBlock, !onReload(indexPath) {
+            return
+        }
+        
+        self.tableView.reloadRows(at: [indexPath], with: .fade)
     }
     
     open func cacheTrackerSectionedConsumerDidRemoveItem(at indexPath: IndexPath) {

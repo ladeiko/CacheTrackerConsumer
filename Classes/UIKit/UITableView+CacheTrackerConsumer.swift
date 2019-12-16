@@ -11,8 +11,18 @@ import ObjectiveC.runtime
 extension UITableView {
     
     private struct AssociatedKeys {
+        static var onReload = ""
         static var offset = ""
         static var sectionOffset = ""
+    }
+    
+    open var cacheTrackerOnReloadBlock: ((_ indexPath: IndexPath) -> Bool)? {
+        get {
+            return objc_getAssociatedObject(self, &AssociatedKeys.onReload) as? ((_ indexPath: IndexPath) -> Bool)
+        }
+        set {
+            objc_setAssociatedObject(self, &AssociatedKeys.onReload, newValue, .OBJC_ASSOCIATION_COPY_NONATOMIC)
+        }
     }
     
     open var cacheTrackerItemsOffset: Int {

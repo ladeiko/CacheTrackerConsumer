@@ -23,6 +23,10 @@ class PlainTableViewController: UITableViewController, CacheTrackerDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        self.tableView.cacheTrackerOnReloadBlock = { index in
+            return true
+        }
+        
         self.cacheTrackerSectionOffset = 2
         self.cacheTrackerItemsOffset = 1
         

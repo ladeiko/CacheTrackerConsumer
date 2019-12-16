@@ -76,7 +76,14 @@ extension UICollectionViewController: CacheTrackerPlainConsumerDelegate {
             case .itemDelete:
                 self.collectionView!.deleteItems(at: [IndexPath(row: update.index, section: self.cacheTrackerSectionOffset)])
             case .itemUpdate:
-                self.collectionView!.reloadItems(at: [IndexPath(row: update.index, section: self.cacheTrackerSectionOffset)])
+                
+                let indexPath = IndexPath(row: update.index, section: self.cacheTrackerSectionOffset)
+                
+                if let onReload = self.collectionView!.cacheTrackerOnReloadBlock, !onReload(indexPath) {
+                    break
+                }
+                
+                self.collectionView!.reloadItems(at: [indexPath])
             }
         }
     }
