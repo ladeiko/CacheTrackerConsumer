@@ -222,6 +222,9 @@ open class CacheTrackerPlainConsumer<T: CacheTrackerPlainModel>: NSObject {
     
     open func update(_ item: T, at linearItemIndex: Int) {
         precondition(_trackChanges)
+        guard linearItemIndex < _items.count else {
+            return
+        }
         _updates.append(ItemOperation(item, at: linearItemIndex))
     }
     
@@ -235,6 +238,9 @@ open class CacheTrackerPlainConsumer<T: CacheTrackerPlainModel>: NSObject {
     
     open func remove(at linearItemIndex: Int) {
         precondition(_trackChanges)
+        guard linearItemIndex < _items.count else {
+            return
+        }
         _deletions.append(IndexOperation(linearItemIndex))
     }
     
@@ -293,6 +299,9 @@ open class CacheTrackerPlainConsumer<T: CacheTrackerPlainModel>: NSObject {
             self._updates.removeAll()
             
             for o in self._deletions {
+                guard o.index < self._items.count else {
+                    continue
+                }
                 if let linkedIO = o.linkedIO as? ItemOperation {
                     linkedIO.movedItem = self._items[o.index]
                 }
