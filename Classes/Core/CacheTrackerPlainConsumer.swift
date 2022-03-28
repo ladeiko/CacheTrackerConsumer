@@ -230,6 +230,7 @@ open class CacheTrackerPlainConsumer<T: CacheTrackerPlainModel>: NSObject {
     
     fileprivate func _update(_ item: T, at linearItemIndex: Int, accumulate: Bool) {
         precondition(_trackChanges)
+        guard equalityChecker == nil || !equalityChecker!(object(at: linearItemIndex), item) else { return }
         _items[linearItemIndex] = item
         if (accumulate) {
             _updatedItems.append(linearItemIndex)
@@ -397,11 +398,14 @@ open class CacheTrackerPlainConsumer<T: CacheTrackerPlainModel>: NSObject {
             }
         }
     }
+
+    open var equalityChecker: ((_ a: T, _ b: T) -> Bool)?
 }
 
 open class CacheTrackerPlainRecurrentConsumer<T: CacheTrackerPlainRecurrentConsumerItem>: CacheTrackerPlainConsumer<T> {
     
     override fileprivate func _update(_ item: T, at linearItemIndex: Int, accumulate: Bool) {
+        guard equalityChecker == nil || !equalityChecker!(object(at: linearItemIndex), item) else { return }
         let newValue = item.recurrentPlainConsumerItem(using: _items[linearItemIndex]) as! T
         super._update(newValue, at: linearItemIndex, accumulate: accumulate)
     }
