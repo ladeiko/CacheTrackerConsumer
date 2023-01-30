@@ -105,7 +105,11 @@ extension UICollectionView: CacheTrackerSectionedConsumerDelegate {
                     break
                 }
                 
-                self.reloadItems(at: [indexPath])
+                if #available(iOS 15.0, *) {
+                    self.reconfigureItems(at: [indexPath])
+                } else {
+                    self.reloadItems(at: [indexPath])
+                }
             }
         }
     }

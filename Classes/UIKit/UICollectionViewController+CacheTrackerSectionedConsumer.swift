@@ -104,8 +104,12 @@ extension UICollectionViewController: CacheTrackerSectionedConsumerDelegate {
                 if let onReload = self.collectionView!.cacheTrackerOnReloadBlock, !onReload(indexPath) {
                     break
                 }
-                
-                self.collectionView!.reloadItems(at: [indexPath])
+
+                if #available(iOS 15.0, *) {
+                    self.collectionView!.reconfigureItems(at: [indexPath])
+                } else {
+                    self.collectionView!.reloadItems(at: [indexPath])
+                }
             }
         }
     }

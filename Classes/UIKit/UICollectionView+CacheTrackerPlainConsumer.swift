@@ -82,8 +82,12 @@ extension UICollectionView: CacheTrackerPlainConsumerDelegate {
                 if let onReload = self.cacheTrackerOnReloadBlock, !onReload(indexPath) {
                     break
                 }
-                
-                self.reloadItems(at: [indexPath])
+
+                if #available(iOS 15.0, *) {
+                    self.reconfigureItems(at: [indexPath])
+                } else {
+                    self.reloadItems(at: [indexPath])
+                }
             }
         }
     }
