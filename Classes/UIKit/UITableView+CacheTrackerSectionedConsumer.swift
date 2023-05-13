@@ -14,15 +14,15 @@ extension UITableView: CacheTrackerSectionedConsumerDelegate {
     }
     
     open func cacheTrackerSectionedConsumerDidUpdateSection(at sectionIndex: Int) {
-        reloadSections(IndexSet(integer: sectionIndex + cacheTrackerSectionOffset), with: .fade)
+        reloadSections(IndexSet(integer: sectionIndex + cacheTrackerSectionOffset), with: cacheTrackerReloadAnimation)
     }
     
     open func cacheTrackerSectionedConsumerDidRemoveSection(at sectionIndex: Int) {
-        deleteSections(IndexSet(integer: sectionIndex + cacheTrackerSectionOffset), with: .fade)
+        deleteSections(IndexSet(integer: sectionIndex + cacheTrackerSectionOffset), with: cacheTrackerDeleteAnimation)
     }
     
     open func cacheTrackerSectionedConsumerDidInsertSection(at sectionIndex: Int) {
-        insertSections(IndexSet(integer: sectionIndex + cacheTrackerSectionOffset), with: .fade)
+        insertSections(IndexSet(integer: sectionIndex + cacheTrackerSectionOffset), with: cacheTrackerInsertAnimation)
     }
     
     open func cacheTrackerSectionedConsumerDidUpdateItem(at indexPath: IndexPath) {
@@ -36,16 +36,16 @@ extension UITableView: CacheTrackerSectionedConsumerDelegate {
         if #available(iOS 15.0, *) {
             reconfigureRows(at: [indexPath])
         } else {
-            reloadRows(at: [indexPath], with: .fade)
+            reloadRows(at: [indexPath], with: cacheTrackerReloadAnimation)
         }
     }
     
     open func cacheTrackerSectionedConsumerDidRemoveItem(at indexPath: IndexPath) {
-        deleteRows(at: [IndexPath(row: indexPath.row, section: indexPath.section + cacheTrackerSectionOffset)], with: .fade)
+        deleteRows(at: [IndexPath(row: indexPath.row, section: indexPath.section + cacheTrackerSectionOffset)], with: cacheTrackerDeleteAnimation)
     }
     
     open func cacheTrackerSectionedConsumerDidInsertItem(at indexPath: IndexPath) {
-        insertRows(at: [IndexPath(row: indexPath.row, section: indexPath.section + cacheTrackerSectionOffset)], with: .fade)
+        insertRows(at: [IndexPath(row: indexPath.row, section: indexPath.section + cacheTrackerSectionOffset)], with: cacheTrackerInsertAnimation)
     }
     
     open func cacheTrackerSectionedConsumerEndUpdates() {

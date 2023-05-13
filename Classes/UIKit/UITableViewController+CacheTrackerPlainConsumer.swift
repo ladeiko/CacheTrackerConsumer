@@ -24,16 +24,18 @@ extension UITableViewController: CacheTrackerPlainConsumerDelegate {
         if #available(iOS 15.0, *) {
             self.tableView.reconfigureRows(at: [indexPath])
         } else {
-            self.tableView.reloadRows(at: [indexPath], with: .fade)
+            self.tableView.reloadRows(at: [indexPath], with: tableView.cacheTrackerReloadAnimation)
         }
     }
     
     open func cacheTrackerPlainConsumerDidRemoveItem(at index: Int) {
-        self.tableView.deleteRows(at: [IndexPath(row: index + cacheTrackerItemsOffset, section: cacheTrackerSectionOffset)], with: .fade)
+        self.tableView.deleteRows(at: [IndexPath(row: index + cacheTrackerItemsOffset, section: cacheTrackerSectionOffset)],
+                                  with: cacheTrackerDeleteAnimation)
     }
     
     open func cacheTrackerPlainConsumerDidInsertItem(at index: Int) {
-        self.tableView.insertRows(at: [IndexPath(row: index + cacheTrackerItemsOffset, section: cacheTrackerSectionOffset)], with: .fade)
+        self.tableView.insertRows(at: [IndexPath(row: index + cacheTrackerItemsOffset, section: cacheTrackerSectionOffset)],
+                                  with: cacheTrackerInsertAnimation)
     }
     
     open func cacheTrackerPlainConsumerEndUpdates() {

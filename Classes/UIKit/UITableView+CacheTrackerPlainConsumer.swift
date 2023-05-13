@@ -8,7 +8,7 @@
 import UIKit
 
 extension UITableView: CacheTrackerPlainConsumerDelegate {
-    
+
     open func cacheTrackerPlainConsumerBeginUpdates() {
         beginUpdates()
     }
@@ -24,16 +24,16 @@ extension UITableView: CacheTrackerPlainConsumerDelegate {
         if #available(iOS 15.0, *) {
             reconfigureRows(at: [indexPath])
         } else {
-            reloadRows(at: [indexPath], with: .fade)
+            reloadRows(at: [indexPath], with: cacheTrackerReloadAnimation)
         }
     }
     
     open func cacheTrackerPlainConsumerDidRemoveItem(at index: Int) {
-        deleteRows(at: [IndexPath(row: index + cacheTrackerItemsOffset, section: cacheTrackerSectionOffset)], with: .fade)
+        deleteRows(at: [IndexPath(row: index + cacheTrackerItemsOffset, section: cacheTrackerSectionOffset)], with: cacheTrackerDeleteAnimation)
     }
     
     open func cacheTrackerPlainConsumerDidInsertItem(at index: Int) {
-        insertRows(at: [IndexPath(row: index + cacheTrackerItemsOffset, section: cacheTrackerSectionOffset)], with: .fade)
+        insertRows(at: [IndexPath(row: index + cacheTrackerItemsOffset, section: cacheTrackerSectionOffset)], with: cacheTrackerInsertAnimation)
     }
     
     open func cacheTrackerPlainConsumerEndUpdates() {

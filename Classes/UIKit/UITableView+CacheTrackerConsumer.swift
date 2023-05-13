@@ -11,12 +11,42 @@ import ObjectiveC.runtime
 extension UITableView {
     
     private struct AssociatedKeys {
+        static var reloadAnimation = ""
+        static var insertAnimation = ""
+        static var deleteAnimation = ""
         static var onReload = ""
         static var offset = ""
         static var sectionOffset = ""
     }
+
+    public var cacheTrackerReloadAnimation: RowAnimation {
+        get {
+            return RowAnimation(rawValue: (objc_getAssociatedObject(self, &AssociatedKeys.reloadAnimation) as? Int) ?? RowAnimation.fade.rawValue) ?? .fade
+        }
+        set {
+            objc_setAssociatedObject(self, &AssociatedKeys.reloadAnimation, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+        }
+    }
+
+    public var cacheTrackerInsertAnimation: RowAnimation {
+        get {
+            return RowAnimation(rawValue: (objc_getAssociatedObject(self, &AssociatedKeys.insertAnimation) as? Int) ?? RowAnimation.fade.rawValue) ?? .fade
+        }
+        set {
+            objc_setAssociatedObject(self, &AssociatedKeys.insertAnimation, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+        }
+    }
+
+    public var cacheTrackerDeleteAnimation: RowAnimation {
+        get {
+            return RowAnimation(rawValue: (objc_getAssociatedObject(self, &AssociatedKeys.deleteAnimation) as? Int) ?? RowAnimation.fade.rawValue) ?? .fade
+        }
+        set {
+            objc_setAssociatedObject(self, &AssociatedKeys.deleteAnimation, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+        }
+    }
     
-    open var cacheTrackerOnReloadBlock: ((_ indexPath: IndexPath) -> Bool)? {
+    public var cacheTrackerOnReloadBlock: ((_ indexPath: IndexPath) -> Bool)? {
         get {
             return objc_getAssociatedObject(self, &AssociatedKeys.onReload) as? ((_ indexPath: IndexPath) -> Bool)
         }
@@ -25,7 +55,7 @@ extension UITableView {
         }
     }
     
-    open var cacheTrackerItemsOffset: Int {
+    public var cacheTrackerItemsOffset: Int {
         get {
             return objc_getAssociatedObject(self, &AssociatedKeys.offset) as? Int ?? 0
         }
@@ -34,7 +64,7 @@ extension UITableView {
         }
     }
     
-    open var cacheTrackerSectionOffset: Int {
+    public var cacheTrackerSectionOffset: Int {
         get {
             return objc_getAssociatedObject(self, &AssociatedKeys.sectionOffset) as? Int ?? 0
         }
@@ -43,54 +73,87 @@ extension UITableView {
         }
     }
     
-    open func plainSection(_ section: Int) -> Int {
+    public func plainSection(_ section: Int) -> Int {
         return section - cacheTrackerSectionOffset
     }
     
-    open func sectionedSection(_ section: Int) -> Int {
+    public func sectionedSection(_ section: Int) -> Int {
         return section - cacheTrackerSectionOffset
     }
     
-    open func plainIndexPath(from globalIndexPath: IndexPath) -> IndexPath {
+    public func plainIndexPath(from globalIndexPath: IndexPath) -> IndexPath {
         return IndexPath(row: globalIndexPath.row - cacheTrackerItemsOffset, section: globalIndexPath.section - cacheTrackerSectionOffset)
     }
     
-    open func sectionedIndexPath(from globalIndexPath: IndexPath) -> IndexPath {
+    public func sectionedIndexPath(from globalIndexPath: IndexPath) -> IndexPath {
         return IndexPath(row: globalIndexPath.row, section: globalIndexPath.section - cacheTrackerSectionOffset)
     }
     
-    open func globalIndexPathPlain(_ indexPath: IndexPath) -> IndexPath {
+    public func globalIndexPathPlain(_ indexPath: IndexPath) -> IndexPath {
         return IndexPath(row: indexPath.row + cacheTrackerItemsOffset, section: indexPath.section + cacheTrackerSectionOffset)
     }
     
-    open func globalIndexPathFromSectioned(_ indexPath: IndexPath) -> IndexPath {
+    public func globalIndexPathFromSectioned(_ indexPath: IndexPath) -> IndexPath {
         return IndexPath(row: indexPath.row, section: indexPath.section + cacheTrackerSectionOffset)
     }
     
-    open func globalSectionCount(_ sectionCount: Int) -> Int {
+    public func globalSectionCount(_ sectionCount: Int) -> Int {
         return sectionCount + cacheTrackerSectionOffset
     }
     
-    open func isPlainDataSection(_ section: Int) -> Bool {
+    public func isPlainDataSection(_ section: Int) -> Bool {
         return section >= cacheTrackerSectionOffset
     }
     
-    open func isSectionedDataSection(_ section: Int) -> Bool {
+    public func isSectionedDataSection(_ section: Int) -> Bool {
         return section >= cacheTrackerSectionOffset
     }
     
-    open func isPlainDataIndexPath(_ indexPath: IndexPath) -> Bool {
+    public func isPlainDataIndexPath(_ indexPath: IndexPath) -> Bool {
         return isPlainDataSection(indexPath.section) && indexPath.row >= cacheTrackerItemsOffset
     }
     
-    open func isSectionedDataIndexPath(_ indexPath: IndexPath) -> Bool {
+    public func isSectionedDataIndexPath(_ indexPath: IndexPath) -> Bool {
         return isSectionedDataSection(indexPath.section)
     }
 }
 
 extension UITableViewController {
+
+    public var cacheTrackerReloadAnimation: UITableView.RowAnimation {
+        get {
+            assert(isViewLoaded)
+            return tableView?.cacheTrackerReloadAnimation ?? .fade
+        }
+        set {
+            assert(isViewLoaded)
+            tableView?.cacheTrackerReloadAnimation = newValue
+        }
+    }
+
+    public var cacheTrackerInsertAnimation: UITableView.RowAnimation {
+        get {
+            assert(isViewLoaded)
+            return tableView?.cacheTrackerInsertAnimation ?? .fade
+        }
+        set {
+            assert(isViewLoaded)
+            tableView?.cacheTrackerInsertAnimation = newValue
+        }
+    }
+
+    public var cacheTrackerDeleteAnimation: UITableView.RowAnimation {
+        get {
+            assert(isViewLoaded)
+            return tableView?.cacheTrackerDeleteAnimation ?? .fade
+        }
+        set {
+            assert(isViewLoaded)
+            tableView?.cacheTrackerDeleteAnimation = newValue
+        }
+    }
     
-    open var cacheTrackerItemsOffset: Int {
+    public var cacheTrackerItemsOffset: Int {
         get {
             assert(isViewLoaded)
             return tableView?.cacheTrackerItemsOffset ?? 0
@@ -101,7 +164,7 @@ extension UITableViewController {
         }
     }
     
-    open var cacheTrackerSectionOffset: Int {
+    public var cacheTrackerSectionOffset: Int {
         get {
             assert(isViewLoaded)
             return tableView?.cacheTrackerSectionOffset ?? 0
@@ -112,47 +175,47 @@ extension UITableViewController {
         }
     }
     
-    open func plainSection(_ section: Int) -> Int {
+    public func plainSection(_ section: Int) -> Int {
         return section - cacheTrackerSectionOffset
     }
     
-    open func sectionedSection(_ section: Int) -> Int {
+    public func sectionedSection(_ section: Int) -> Int {
         return section - cacheTrackerSectionOffset
     }
     
-    open func plainIndexPath(from globalIndexPath: IndexPath) -> IndexPath {
+    public func plainIndexPath(from globalIndexPath: IndexPath) -> IndexPath {
         return IndexPath(row: globalIndexPath.row - cacheTrackerItemsOffset, section: globalIndexPath.section - cacheTrackerSectionOffset)
     }
     
-    open func sectionedIndexPath(from globalIndexPath: IndexPath) -> IndexPath {
+    public func sectionedIndexPath(from globalIndexPath: IndexPath) -> IndexPath {
         return IndexPath(row: globalIndexPath.row, section: globalIndexPath.section - cacheTrackerSectionOffset)
     }
     
-    open func globalIndexPathPlain(_ indexPath: IndexPath) -> IndexPath {
+    public func globalIndexPathPlain(_ indexPath: IndexPath) -> IndexPath {
         return IndexPath(row: indexPath.row + cacheTrackerItemsOffset, section: indexPath.section + cacheTrackerSectionOffset)
     }
     
-    open func globalIndexPathFromSectioned(_ indexPath: IndexPath) -> IndexPath {
+    public func globalIndexPathFromSectioned(_ indexPath: IndexPath) -> IndexPath {
         return IndexPath(row: indexPath.row, section: indexPath.section + cacheTrackerSectionOffset)
     }
     
-    open func globalSectionCount(_ sectionCount: Int) -> Int {
+    public func globalSectionCount(_ sectionCount: Int) -> Int {
         return sectionCount + cacheTrackerSectionOffset
     }
     
-    open func isPlainDataSection(_ section: Int) -> Bool {
+    public func isPlainDataSection(_ section: Int) -> Bool {
         return section >= cacheTrackerSectionOffset
     }
     
-    open func isSectionedDataSection(_ section: Int) -> Bool {
+    public func isSectionedDataSection(_ section: Int) -> Bool {
         return section >= cacheTrackerSectionOffset
     }
     
-    open func isPlainDataIndexPath(_ indexPath: IndexPath) -> Bool {
+    public func isPlainDataIndexPath(_ indexPath: IndexPath) -> Bool {
         return isPlainDataSection(indexPath.section) && indexPath.row >= cacheTrackerItemsOffset
     }
     
-    open func isSectionedDataIndexPath(_ indexPath: IndexPath) -> Bool {
+    public func isSectionedDataIndexPath(_ indexPath: IndexPath) -> Bool {
         return isSectionedDataSection(indexPath.section)
     }
 }
